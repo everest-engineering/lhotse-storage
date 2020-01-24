@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+engineering.everest.starterkit.filestorage.config.AwsS3FileStoreConfig,\
+engineering.everest.starterkit.filestorage.config.DeduplicatingFileStoreConfig,\
+engineering.everest.starterkit.filestorage.config.MongoGridFsFileStoreConfig

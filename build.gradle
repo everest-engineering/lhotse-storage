@@ -1,0 +1,59 @@
+plugins {
+	id 'java'
+	id 'io.freefair.lombok' version '4.1.5'
+	id 'maven-publish'
+	id "com.jfrog.bintray" version "1.8.4"
+}
+
+apply plugin: 'io.freefair.lombok'
+apply plugin: 'idea'
+
+group = 'engineering.everest'
+version = '0.0.6'
+sourceCompatibility = '1.11'
+
+repositories {
+	mavenCentral()
+}
+
+test {
+	useJUnitPlatform()
+}
+
+lombok {
+    version = "1.18.10"
+    generateLombokConfig.enabled = false
+}
+
+ext {
+    springBootVersion = '2.2.4.RELEASE'
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-mongodb:${springBootVersion}"
+    implementation "com.google.guava:guava:28.2-jre"
+    implementation "com.amazonaws:aws-java-sdk-s3:1.11.705"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.6.0"
+    testImplementation "org.mockito:mockito-junit-jupiter:3.2.4"
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'file-storage'
+        name = 'file-storage'
+        userOrg = 'everestengineering'
+    }
+    publish = true
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}
