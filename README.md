@@ -13,6 +13,10 @@ File stores need backing service such as a blob store or filesystem. This starte
 #### Spring boot beans
 Exposes the spring bean `FileService` for consumers
 
+### NOTE:
+We use `@EnableMongoRepositories` annotation to let spring configure repository beans. In your application you have to
+explicitly use the same annotation to specify the repository packages to scan for repository beans.
+
 #### Configuring Mongo GridFS
 Set the application property
 ```
