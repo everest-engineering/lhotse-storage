@@ -2,8 +2,6 @@ package engineering.everest.starterkit.filestorage;
 
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,13 +10,10 @@ import java.util.UUID;
 
 import static java.nio.file.Files.createTempFile;
 
-@Component
 public class FileService {
 
     private final FileMappingRepository fileMappingRepository;
-    @Qualifier("permanentDeduplicatingFileStore")
     private final DeduplicatingFileStore permanentFileStore;
-    @Qualifier("ephemeralDeduplicatingFileStore")
     private final DeduplicatingFileStore ephemeralFileStore;
 
     public FileService(FileMappingRepository fileMappingRepository,
