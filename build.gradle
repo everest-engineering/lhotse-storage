@@ -8,7 +8,7 @@ plugins {
 apply plugin: 'io.freefair.lombok'
 apply plugin: 'idea'
 
-group = 'engineering.everest'
+group = 'engineering.everest.starterkit'
 version = '0.0.6'
 sourceCompatibility = '1.11'
 
@@ -42,10 +42,13 @@ dependencies {
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
+    publications = ['maven']
     pkg {
-        repo = 'storage'
-        name = 'storage'
+        repo = 'starterkit'
+        name = rootProject.name
         userOrg = 'everestengineering'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/everestengineering/starterkit-storage'
     }
     publish = true
 }
