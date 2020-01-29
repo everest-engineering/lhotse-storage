@@ -21,7 +21,7 @@ public class AwsS3FileStoreConfig {
 
     @Bean
     @Qualifier("permanentFileStore")
-    FileStore awsS3PermananetFileStore(AmazonS3 s3Client, @Value("${application.filestore.awsS3.buckets.permanent}") String bucketName) {
+    FileStore awsS3PermanentFileStore(AmazonS3 s3Client, @Value("${application.filestore.awsS3.buckets.permanent}") String bucketName) {
         return new AwsS3FileStore(s3Client, bucketName);
     }
 
