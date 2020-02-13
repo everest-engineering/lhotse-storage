@@ -13,15 +13,15 @@ import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 
-public class NativeDeduplicatingFileStore implements DeduplicatingFileStore {
+public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
 
     private final FileStoreType fileStoreType;
     private final FileMappingRepository fileMappingRepository;
     private FileStore fileStore;
 
-    public NativeDeduplicatingFileStore(FileStoreType fileStoreType,
-                                        FileMappingRepository fileMappingRepository,
-                                        FileStore fileStore) {
+    public DefaultDeduplicatingFileStore(FileStoreType fileStoreType,
+                                         FileMappingRepository fileMappingRepository,
+                                         FileStore fileStore) {
         this.fileStoreType = fileStoreType;
         this.fileMappingRepository = fileMappingRepository;
         this.fileStore = fileStore;
