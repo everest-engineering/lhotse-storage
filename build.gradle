@@ -11,7 +11,7 @@ apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'engineering.everest.starterkit'
-version = '0.0.6'
+version = '0.0.7'
 sourceCompatibility = '1.11'
 
 repositories {
@@ -40,6 +40,7 @@ dependencyManagement {
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
     implementation "com.google.guava:guava:28.2-jre"
     implementation "com.amazonaws:aws-java-sdk-s3:1.11.705"
 

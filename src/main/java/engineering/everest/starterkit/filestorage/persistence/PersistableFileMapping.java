@@ -6,15 +6,17 @@ import engineering.everest.starterkit.filestorage.PersistedFileIdentifier;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "fs.mappings")
+@Entity
+@Table(name = "filestore-mappings")
 public class PersistableFileMapping {
 
     @Id
