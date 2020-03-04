@@ -8,13 +8,11 @@ import engineering.everest.starterkit.filestorage.persistence.FileMappingReposit
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
 
 @Configuration
-@EnableMongoRepositories("engineering.everest.starterkit.filestorage.persistence")
 public class DeduplicatingFileStoreConfig {
 
     @Bean

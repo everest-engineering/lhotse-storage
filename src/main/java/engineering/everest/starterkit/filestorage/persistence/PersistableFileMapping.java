@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "filestore-mappings")
+@Table(name = "filestore.mappings")
 public class PersistableFileMapping {
 
     @Id
