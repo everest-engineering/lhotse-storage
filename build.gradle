@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'io.freefair.lombok' version '4.1.5'
+	id 'io.freefair.lombok' version '4.1.6'
 	id 'maven-publish'
 	id "com.jfrog.bintray" version "1.8.4"
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
@@ -23,12 +23,17 @@ test {
 }
 
 lombok {
-    version = "1.18.10"
+    version = "1.18.12"
     generateLombokConfig.enabled = false
 }
 
 ext {
-    springBootVersion = '2.2.4.RELEASE'
+    springBootVersion = '2.2.5.RELEASE'
+
+    awsSdkVersion = '1.11.740'
+    guavaVersion = '28.1-jre'
+    junitVersion = '5.6.0'
+    mockitoVersion = '3.2.4'
 }
 
 dependencyManagement {
@@ -41,11 +46,11 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter"
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation "com.google.guava:guava:28.2-jre"
-    implementation "com.amazonaws:aws-java-sdk-s3:1.11.705"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
 
-    testImplementation "org.junit.jupiter:junit-jupiter:5.6.0"
-    testImplementation "org.mockito:mockito-junit-jupiter:3.2.4"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
 }
 
 bintray {
