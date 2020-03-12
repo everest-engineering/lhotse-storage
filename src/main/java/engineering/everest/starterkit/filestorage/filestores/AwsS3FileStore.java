@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.S3Object;
 import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import engineering.everest.starterkit.filestorage.NativeStorageType;
 
 import java.io.InputStream;
@@ -36,11 +37,11 @@ public class AwsS3FileStore implements FileStore {
 
     @Override
     @SuppressWarnings("PMD.CloseResource")
-    public InputStream read(String fileIdentifier) {
+    public InputStreamOfKnownLength read(String fileIdentifier) {
         AmazonS3URI s3URI = new AmazonS3URI(fileIdentifier);
         if (amazonS3.doesObjectExist(s3URI.getBucket(), s3URI.getKey())) {
             S3Object s3Object = amazonS3.getObject(s3URI.getBucket(), s3URI.getKey());
-            return s3Object.getObjectContent();
+            return new InputStreamOfKnownLength(s3Object.getObjectContent(), s3Object.getObjectMetadata().getInstanceLength());
         } else {
             throw new RuntimeException(String.format("Unable to retrieve file: %s", fileIdentifier));
         }

@@ -43,7 +43,7 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
     }
 
     @Override
-    public InputStream stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
+    public InputStreamOfKnownLength stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
         return fileStore.read(persistedFileIdentifier.getNativeStorageFileId());
     }
 

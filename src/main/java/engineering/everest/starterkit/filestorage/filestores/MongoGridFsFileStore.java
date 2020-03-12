@@ -1,6 +1,7 @@
 package engineering.everest.starterkit.filestorage.filestores;
 
 import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import engineering.everest.starterkit.filestorage.NativeStorageType;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Query;
@@ -21,7 +22,6 @@ public class MongoGridFsFileStore implements FileStore {
         this.gridFs = gridFs;
     }
 
-
     @Override
     public String create(InputStream inputStream, String fileName) {
         ObjectId mongoObjectId = gridFs.store(inputStream, fileName);
@@ -34,12 +34,12 @@ public class MongoGridFsFileStore implements FileStore {
     }
 
     @Override
-    public InputStream read(String fileIdentifier) throws IOException {
+    public InputStreamOfKnownLength read(String fileIdentifier) throws IOException {
         var gridFSFile = gridFs.findOne(new Query(where("_id").is(fileIdentifier)));
         if (gridFSFile == null) {
             throw new RuntimeException("Unable to retrieve file " + fileIdentifier);
         }
-        return gridFs.getResource(gridFSFile).getInputStream();
+        return new InputStreamOfKnownLength(gridFs.getResource(gridFSFile).getInputStream(), gridFSFile.getLength());
     }
 
     @Override

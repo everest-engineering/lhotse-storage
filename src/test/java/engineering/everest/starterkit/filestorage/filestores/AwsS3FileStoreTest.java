@@ -1,6 +1,7 @@
 package engineering.everest.starterkit.filestorage.filestores;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,6 @@ class AwsS3FileStoreTest {
     @Test
     public void create_CreatesUniquelyNamedObjectInTheS3Bucket() {
         var mockInputStream = mock(InputStream.class);
-
         var fileIdentifier = fileStore.create(mockInputStream, "fileName");
         // Would have been a clean test if the UUID wrapper hadn't been removed
         var randomUUIDPart = UUID.fromString(fileIdentifier.substring(fileIdentifier.indexOf('-') + 1));
@@ -56,12 +56,18 @@ class AwsS3FileStoreTest {
     }
 
     @Test
-    public void read_FetchesTheObjectFromS3Bucket() throws IOException {
+    public void read_FetchesTheObjectFromS3Bucket() {
+        var fileIdentifier = "s3://bucket/fileName";
+        var mockS3Object = mock(S3Object.class);
+        ObjectMetadata objectMetadata = mock(ObjectMetadata.class);
+        when(mockS3Object.getObjectMetadata()).thenReturn(objectMetadata);
+        when(objectMetadata.getInstanceLength()).thenReturn(10L);
+
         when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
-        when(amazonS3.getObject("bucket", "fileName")).thenReturn(mock(S3Object.class));
+        when(amazonS3.getObject("bucket", "fileName")).thenReturn(mockS3Object);
 
-        fileStore.read("s3://bucket/fileName");
-
+        var inputStreamOfKnownLength = fileStore.read(fileIdentifier);
+        assertEquals(10L, inputStreamOfKnownLength.getLength());
         verify(amazonS3).getObject("bucket", "fileName");
     }
 

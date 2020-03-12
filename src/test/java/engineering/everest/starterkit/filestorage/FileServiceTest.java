@@ -102,8 +102,9 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.stream(persistedFileIdentifier)).thenReturn(inputStreamOngoingStubbing);
-        assertEquals(inputStreamOngoingStubbing, fileService.stream(persistedFileIdentifier.getFileId()));
+        when(permanentFileStore.stream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+
+        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
     }
 
     @Test
@@ -114,7 +115,8 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.stream(persistedFileIdentifier)).thenReturn(inputStreamOngoingStubbing);
-        assertEquals(inputStreamOngoingStubbing, fileService.stream(persistedFileIdentifier.getFileId()));
+        when(ephemeralFileStore.stream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+
+        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
     }
 }

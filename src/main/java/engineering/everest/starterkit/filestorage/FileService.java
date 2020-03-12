@@ -42,7 +42,7 @@ public class FileService {
         return transferToEphemeralStore("", inputStream);
     }
 
-    public InputStream stream(UUID fileId) throws IOException {
+    public InputStreamOfKnownLength stream(UUID fileId) throws IOException {
         PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(FileStoreType.PERMANENT) ? permanentFileStore : ephemeralFileStore;
         return fileStore.stream(persistableFileMapping.getPersistedFileIdentifier());

@@ -9,7 +9,7 @@ public interface FileStore {
 
     void delete(String fileIdentifier);
 
-    InputStream read(String fileIdentifier) throws IOException;
+    InputStreamOfKnownLength read(String fileIdentifier) throws IOException;
 
     NativeStorageType nativeStorageType();
 }

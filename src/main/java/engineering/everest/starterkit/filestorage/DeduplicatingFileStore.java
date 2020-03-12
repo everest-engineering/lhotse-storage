@@ -7,5 +7,5 @@ public interface DeduplicatingFileStore {
 
     PersistedFile store(String originalFilename, InputStream inputStream) throws IOException;
 
-    InputStream stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException;
+    InputStreamOfKnownLength stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException;
 }
