@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface FileStore {
+
     String create(InputStream inputStream, String fileName);
 
     void delete(String fileIdentifier);

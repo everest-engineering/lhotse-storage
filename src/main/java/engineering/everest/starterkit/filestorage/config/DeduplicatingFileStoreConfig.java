@@ -3,7 +3,7 @@ package engineering.everest.starterkit.filestorage.config;
 import engineering.everest.starterkit.filestorage.DeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.FileStore;
-import engineering.everest.starterkit.filestorage.NativeDeduplicatingFileStore;
+import engineering.everest.starterkit.filestorage.DefaultDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -19,14 +19,14 @@ public class DeduplicatingFileStoreConfig {
     @Qualifier("permanentDeduplicatingFileStore")
     DeduplicatingFileStore permanentFileStore(FileMappingRepository fileMappingRepository,
                                               @Qualifier("permanentFileStore") FileStore fileStore) {
-        return new NativeDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
+        return new DefaultDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
     }
 
     @Bean
     @Qualifier("ephemeralDeduplicatingFileStore")
     DeduplicatingFileStore ephemeralFileStore(FileMappingRepository fileMappingRepository,
                                               @Qualifier("ephemeralFileStore") FileStore fileStore) {
-        return new NativeDeduplicatingFileStore(EPHEMERAL, fileMappingRepository, fileStore);
+        return new DefaultDeduplicatingFileStore(EPHEMERAL, fileMappingRepository, fileStore);
     }
 
     @Bean

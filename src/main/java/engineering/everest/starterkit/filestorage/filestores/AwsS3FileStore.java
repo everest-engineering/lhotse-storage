@@ -9,6 +9,7 @@ import engineering.everest.starterkit.filestorage.NativeStorageType;
 import java.io.InputStream;
 
 import static engineering.everest.starterkit.filestorage.NativeStorageType.AWS_S3;
+import static java.util.UUID.randomUUID;
 
 public class AwsS3FileStore implements FileStore {
 
@@ -22,8 +23,9 @@ public class AwsS3FileStore implements FileStore {
 
     @Override
     public String create(InputStream inputStream, String fileName) {
-        amazonS3.putObject(this.bucketName, fileName, inputStream, null);
-        return String.format("s3://%s/%s", this.bucketName, fileName);
+        String uniqueS3Filename = ensureFilenameIsUniqueForS3(fileName);
+        amazonS3.putObject(bucketName, uniqueS3Filename, inputStream, null);
+        return String.format("s3://%s/%s", bucketName, uniqueS3Filename);
     }
 
     @Override
@@ -47,5 +49,9 @@ public class AwsS3FileStore implements FileStore {
     @Override
     public NativeStorageType nativeStorageType() {
         return AWS_S3;
+    }
+
+    private String ensureFilenameIsUniqueForS3(String filename) {
+        return String.format("%s-%s", filename, randomUUID());
     }
 }

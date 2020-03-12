@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NativeDeduplicatingFileStoreTest {
+class DefaultDeduplicatingFileStoreTest {
 
     private static final String ORIGINAL_FILENAME = "original-filename";
     private static final String EXISTING_NATIVE_STORE_FILE_ID = "existing-native-store-file-id";
@@ -35,7 +35,7 @@ class NativeDeduplicatingFileStoreTest {
     private static final String TEMPORARY_FILE_CONTENTS = "A temporary file for unit testing";
     private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
 
-    private NativeDeduplicatingFileStore nativeDeduplicatingFileStore;
+    private DefaultDeduplicatingFileStore defaultDeduplicatingFileStore;
     private String fileIdentifier;
 
     @Mock
@@ -45,7 +45,7 @@ class NativeDeduplicatingFileStoreTest {
 
     @BeforeEach
     void setUp() {
-        nativeDeduplicatingFileStore = new NativeDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
+        defaultDeduplicatingFileStore = new DefaultDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
         fileIdentifier = "FILE_ID";
 
         when(fileStore.nativeStorageType()).thenReturn(MONGO_GRID_FS);
@@ -59,7 +59,7 @@ class NativeDeduplicatingFileStoreTest {
 
     @Test
     void store_WillPersistAndReturnNativeStorageEncodingFileId() throws IOException {
-        PersistedFile persistedFile = nativeDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        PersistedFile persistedFile = defaultDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verifyNoMoreInteractions(fileStore);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE));
@@ -72,7 +72,7 @@ class NativeDeduplicatingFileStoreTest {
         when(fileMappingRepository.findOne(any(Example.class))).thenReturn(
                 Optional.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
 
-        PersistedFile persistedFile = nativeDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        PersistedFile persistedFile = defaultDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verify(fileStore).delete(fileIdentifier);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));

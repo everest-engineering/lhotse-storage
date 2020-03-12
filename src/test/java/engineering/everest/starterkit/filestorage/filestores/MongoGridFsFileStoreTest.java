@@ -49,9 +49,7 @@ class MongoGridFsFileStoreTest {
 
     @Test
     public void read_FailsToFetchFileFromGridFsIfItDoesNotExist() {
-        String fileIdentifier = "5e253b753496211048764352";
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> fileStore.read(fileIdentifier));
+        var exception = assertThrows(RuntimeException.class, () -> fileStore.read("5e253b753496211048764352"));
 
         assertEquals(exception.getMessage(), "Unable to retrieve file 5e253b753496211048764352");
     }
