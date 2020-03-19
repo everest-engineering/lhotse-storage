@@ -5,7 +5,9 @@ import java.io.InputStream;
 
 public interface DeduplicatingFileStore {
 
-    PersistedFile store(String originalFilename, InputStream inputStream) throws IOException;
+    PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException;
 
-    InputStreamOfKnownLength stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException;
+    PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException;
+
+    InputStreamOfKnownLength downloadAsStream(PersistedFileIdentifier persistedFileIdentifier) throws IOException;
 }

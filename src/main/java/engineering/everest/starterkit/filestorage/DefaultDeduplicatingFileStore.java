@@ -28,23 +28,39 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
     }
 
     @Override
-    public PersistedFile store(String originalFilename, InputStream inputStream) throws IOException {
+    public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
         try (var countingInputStream = new CountingInputStream(inputStream);
              var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), countingInputStream);
              var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
-            String fileIdentifier = fileStore.create(sha512ingInputStream, originalFilename);
-            long fileSizeBytes = countingInputStream.getCount();
-            PersistedFile persistedFile = deduplicateUploadedFile(fileIdentifier,
-                    sha256ingInputStream.hash().toString(), sha512ingInputStream.hash().toString(),
-                    fileSizeBytes, fileStore.nativeStorageType());
-            updateFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
-            return persistedFile;
+            var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename);
+
+            return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
+                    sha512ingInputStream.hash().toString(), fileIdentifier, countingInputStream.getCount());
         }
     }
 
     @Override
-    public InputStreamOfKnownLength stream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
-        return fileStore.read(persistedFileIdentifier.getNativeStorageFileId());
+    public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
+        try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
+             var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
+            var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename, fileSize);
+
+            return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
+                    sha512ingInputStream.hash().toString(), fileIdentifier, fileSize);
+        }
+    }
+
+    @Override
+    public InputStreamOfKnownLength downloadAsStream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
+        return fileStore.downloadAsStream(persistedFileIdentifier.getNativeStorageFileId());
+    }
+
+    private PersistedFile persistDeduplicateAndUpdateFileMapping(String sha256,
+                                                                 String sha512,
+                                                                 String fileIdentifier, long fileSizeBytes) {
+        var persistedFile = deduplicateUploadedFile(fileIdentifier, sha256, sha512, fileSizeBytes, fileStore.nativeStorageType());
+        updateFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
+        return persistedFile;
     }
 
     private PersistedFile deduplicateUploadedFile(String fileIdentifier, String uploadSha256, String uploadSha512,
@@ -56,8 +72,8 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
             return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, existingFileMapping.get().getNativeStorageFileId(),
                     uploadSha256, uploadSha512, fileSizeBytes);
         } else {
-            return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, fileIdentifier,
-                    uploadSha256, uploadSha512, fileSizeBytes);
+            return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, fileIdentifier, uploadSha256, uploadSha512,
+                    fileSizeBytes);
         }
     }
 
@@ -65,7 +81,8 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
         var fileMappingExample = new PersistableFileMapping();
         fileMappingExample.setSha256(uploadSha256);
         fileMappingExample.setSha512(uploadSha512);
-        return fileMappingRepository.findOne(Example.of(fileMappingExample));
+        var matchingFiles = fileMappingRepository.findAll(Example.of(fileMappingExample));
+        return matchingFiles.isEmpty() ? Optional.empty() : Optional.of(matchingFiles.get(0));
     }
 
     private void updateFileMapping(PersistedFile persistedFile, long fileSizeBytes, NativeStorageType nativeStorageType) {

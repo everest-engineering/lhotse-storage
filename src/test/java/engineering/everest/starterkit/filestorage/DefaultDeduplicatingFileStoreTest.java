@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.List;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
@@ -23,7 +23,9 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultDeduplicatingFileStoreTest {
@@ -49,17 +51,18 @@ class DefaultDeduplicatingFileStoreTest {
         fileIdentifier = "FILE_ID";
 
         when(fileStore.nativeStorageType()).thenReturn(MONGO_GRID_FS);
-        when(fileStore.create(any(InputStream.class), eq(ORIGINAL_FILENAME))).thenAnswer(invocation -> {
+    }
+
+    @Test
+    void uploadAsStream_WillPersistAndReturnNativeStorageEncodingFileId() throws IOException {
+        when(fileStore.uploadStream(any(InputStream.class), eq(ORIGINAL_FILENAME))).thenAnswer(invocation -> {
             InputStream inputFile = invocation.getArgument(0);
             inputFile.readAllBytes();
             inputFile.close();
             return fileIdentifier;
         });
-    }
 
-    @Test
-    void store_WillPersistAndReturnNativeStorageEncodingFileId() throws IOException {
-        PersistedFile persistedFile = defaultDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verifyNoMoreInteractions(fileStore);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE));
@@ -68,11 +71,42 @@ class DefaultDeduplicatingFileStoreTest {
     }
 
     @Test
-    void store_WillDeduplicate_WhenFileAlreadyPresentInStore() throws IOException {
-        when(fileMappingRepository.findOne(any(Example.class))).thenReturn(
-                Optional.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
+    void uploadAsStream_WillDeduplicate_WhenFileAlreadyPresentInStore() throws IOException {
+        when(fileStore.uploadStream(any(InputStream.class), eq(ORIGINAL_FILENAME))).thenAnswer(invocation -> {
+            InputStream inputFile = invocation.getArgument(0);
+            inputFile.readAllBytes();
+            inputFile.close();
+            return fileIdentifier;
+        });
 
-        PersistedFile persistedFile = defaultDeduplicatingFileStore.store(ORIGINAL_FILENAME, createTempFileWithContents());
+        when(fileMappingRepository.findAll(any(Example.class))).thenReturn(
+                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
+
+        PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
+
+        verify(fileStore).delete(fileIdentifier);
+        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));
+        PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE);
+        assertEquals(expectedPersistedFile, persistedFile);
+    }
+
+    @Test
+    void uploadAsStreamWithKnownFileSize_WillDeduplicate_WhenFileAlreadyPresentInStore() throws IOException {
+        when(fileStore.uploadStream(any(InputStream.class), eq(ORIGINAL_FILENAME), eq(FILE_SIZE))).thenAnswer(invocation -> {
+            InputStream inputFile = invocation.getArgument(0);
+            inputFile.readAllBytes();
+            inputFile.close();
+            return fileIdentifier;
+        });
+
+        when(fileMappingRepository.findAll(any(Example.class))).thenReturn(
+                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
+
+        PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, FILE_SIZE, createTempFileWithContents());
 
         verify(fileStore).delete(fileIdentifier);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));

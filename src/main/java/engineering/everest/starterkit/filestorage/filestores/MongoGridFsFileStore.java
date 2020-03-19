@@ -23,7 +23,13 @@ public class MongoGridFsFileStore implements FileStore {
     }
 
     @Override
-    public String create(InputStream inputStream, String fileName) {
+    public String uploadStream(InputStream inputStream, String fileName) {
+        ObjectId mongoObjectId = gridFs.store(inputStream, fileName);
+        return mongoObjectId.toHexString();
+    }
+
+    @Override
+    public String uploadStream(InputStream inputStream, String fileName, long ignored) {
         ObjectId mongoObjectId = gridFs.store(inputStream, fileName);
         return mongoObjectId.toHexString();
     }
@@ -34,7 +40,7 @@ public class MongoGridFsFileStore implements FileStore {
     }
 
     @Override
-    public InputStreamOfKnownLength read(String fileIdentifier) throws IOException {
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException {
         var gridFSFile = gridFs.findOne(new Query(where("_id").is(fileIdentifier)));
         if (gridFSFile == null) {
             throw new RuntimeException("Unable to retrieve file " + fileIdentifier);

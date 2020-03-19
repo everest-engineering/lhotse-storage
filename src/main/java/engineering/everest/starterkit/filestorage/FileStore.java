@@ -5,11 +5,13 @@ import java.io.InputStream;
 
 public interface FileStore {
 
-    String create(InputStream inputStream, String fileName);
+    String uploadStream(InputStream inputStream, String fileName);
+
+    String uploadStream(InputStream inputStream, String fileName, long fileSize);
 
     void delete(String fileIdentifier);
 
-    InputStreamOfKnownLength read(String fileIdentifier) throws IOException;
+    InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException;
 
     NativeStorageType nativeStorageType();
 }

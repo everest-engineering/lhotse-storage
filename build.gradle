@@ -11,7 +11,7 @@ apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'engineering.everest.starterkit'
-version = '0.0.9'
+version = '0.0.10'
 sourceCompatibility = '1.11'
 
 repositories {
@@ -28,10 +28,11 @@ lombok {
 }
 
 ext {
+    awsSdkVersion = '1.11.740'
+    commonsLangVersion = '3.9'
+    guavaVersion = '28.1-jre'
     springBootVersion = '2.2.5.RELEASE'
 
-    awsSdkVersion = '1.11.740'
-    guavaVersion = '28.1-jre'
     junitVersion = '5.6.0'
     mockitoVersion = '3.2.4'
 }
@@ -48,6 +49,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "com.google.guava:guava:${guavaVersion}"
     implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
+    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"

@@ -31,16 +31,25 @@ class MongoGridFsFileStoreTest {
     }
 
     @Test
-    public void create_StoresFileInGridFs() {
+    public void uploadStream_WillStoreFileInGridFs() {
         var objectId = new ObjectId();
         var mockInputStream = mock(InputStream.class);
         when(gridFsTemplate.store(mockInputStream, "file")).thenReturn(objectId);
 
-        assertEquals(fileStore.create(mockInputStream, "file"), objectId.toHexString());
+        assertEquals(fileStore.uploadStream(mockInputStream, "file"), objectId.toHexString());
     }
 
     @Test
-    public void delete_RemovesFileInGridFs() {
+    public void uploadStreamWithFileSize_WillStoreFileInGridFs() {
+        var objectId = new ObjectId();
+        var mockInputStream = mock(InputStream.class);
+        when(gridFsTemplate.store(mockInputStream, "file")).thenReturn(objectId);
+
+        assertEquals(fileStore.uploadStream(mockInputStream, "file", 4343L), objectId.toHexString());
+    }
+
+    @Test
+    public void delete_WillRemoveFileFromGridFs() {
         String fileIdentifier = "5e253b753496211048764352";
         fileStore.delete(fileIdentifier);
 
@@ -48,8 +57,8 @@ class MongoGridFsFileStoreTest {
     }
 
     @Test
-    public void read_FailsToFetchFileFromGridFsIfItDoesNotExist() {
-        var exception = assertThrows(RuntimeException.class, () -> fileStore.read("5e253b753496211048764352"));
+    public void downloadAsStream_WillFailWhenFilesDoesNotExist() {
+        var exception = assertThrows(RuntimeException.class, () -> fileStore.downloadAsStream("5e253b753496211048764352"));
 
         assertEquals(exception.getMessage(), "Unable to retrieve file 5e253b753496211048764352");
     }

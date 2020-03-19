@@ -57,12 +57,12 @@ class FileServiceTest {
 
     @Test
     void transferToPermanentStorE_WillDelegateToPermanentStore() throws IOException {
-        when(permanentFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
+        when(permanentFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToPermanentStore(ORIGINAL_FILENAME, inputStream);
-            verify(permanentFileStore).store(ORIGINAL_FILENAME, inputStream);
+            verify(permanentFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
         }
 
         verifyNoInteractions(ephemeralFileStore);
@@ -70,12 +70,12 @@ class FileServiceTest {
 
     @Test
     void transferToEphemeralStore_WillDelegateToEphemeralStore() throws IOException {
-        when(ephemeralFileStore.store(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
+        when(ephemeralFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(ORIGINAL_FILENAME, inputStream);
-            verify(ephemeralFileStore).store(ORIGINAL_FILENAME, inputStream);
+            verify(ephemeralFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
         }
 
         verifyNoInteractions(permanentFileStore);
@@ -83,12 +83,12 @@ class FileServiceTest {
 
     @Test
     void transferToEphemeralStore_WillDelegateToEphemeralStore_WhenNoFilenamespecified() throws IOException {
-        when(ephemeralFileStore.store(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
+        when(ephemeralFileStore.uploadAsStream(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
 
         File tempFile = fileService.createTemporaryFile();
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(inputStream);
-            verify(ephemeralFileStore).store("", inputStream);
+            verify(ephemeralFileStore).uploadAsStream("", inputStream);
         }
 
         verifyNoInteractions(permanentFileStore);
@@ -102,7 +102,7 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.stream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(permanentFileStore.downloadAsStream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
     }
@@ -115,7 +115,7 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.stream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(ephemeralFileStore.downloadAsStream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
     }

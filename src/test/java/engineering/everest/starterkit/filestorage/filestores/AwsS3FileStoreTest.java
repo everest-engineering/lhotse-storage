@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -32,9 +31,9 @@ class AwsS3FileStoreTest {
     }
 
     @Test
-    public void create_CreatesUniquelyNamedObjectInTheS3Bucket() {
+    public void uploadStream_WillCreateUniquelyNamedS3Object() {
         var mockInputStream = mock(InputStream.class);
-        var fileIdentifier = fileStore.create(mockInputStream, "fileName");
+        var fileIdentifier = fileStore.uploadStream(mockInputStream, "fileName");
         // Would have been a clean test if the UUID wrapper hadn't been removed
         var randomUUIDPart = UUID.fromString(fileIdentifier.substring(fileIdentifier.indexOf('-') + 1));
 
@@ -43,20 +42,32 @@ class AwsS3FileStoreTest {
     }
 
     @Test
-    public void delete_DeletesTheObjectFromS3Bucket() {
+    public void uploadStreamWillFileSize_WillCreateUniquelyNamedS3Object() {
+        var mockInputStream = mock(InputStream.class);
+        var fileIdentifier = fileStore.uploadStream(mockInputStream, "fileName", 4543L);
+        // Would have been a clean test if the UUID wrapper hadn't been removed
+        var randomUUIDPart = UUID.fromString(fileIdentifier.substring(fileIdentifier.indexOf('-') + 1));
+
+        assertEquals(String.format("s3://bucket/fileName-%s", randomUUIDPart), fileIdentifier);
+        verify(amazonS3).putObject(eq("bucket"), eq(String.format("fileName-%s", randomUUIDPart)),
+                eq(mockInputStream), any(ObjectMetadata.class));
+    }
+
+    @Test
+    public void delete_WillDeleteFromTheS3Bucket() {
         fileStore.delete("s3://bucket/fileName");
 
         verify(amazonS3).deleteObject("bucket", "fileName");
     }
 
     @Test
-    public void read_FailsIfTheObjectDoesNotExistInTheS3Bucket() {
-        var exception = assertThrows(RuntimeException.class, () -> fileStore.read("s3://bucket/fileName"));
+    public void downloadAsStream_WillFailWhenTheObjectDoesNotExistInTheS3Bucket() {
+        var exception = assertThrows(RuntimeException.class, () -> fileStore.downloadAsStream("s3://bucket/fileName"));
         assertEquals("Unable to retrieve file: s3://bucket/fileName", exception.getMessage());
     }
 
     @Test
-    public void read_FetchesTheObjectFromS3Bucket() {
+    public void downloadAsStream_WillFetchTheObjectFromS3Bucket() {
         var fileIdentifier = "s3://bucket/fileName";
         var mockS3Object = mock(S3Object.class);
         ObjectMetadata objectMetadata = mock(ObjectMetadata.class);
@@ -66,7 +77,7 @@ class AwsS3FileStoreTest {
         when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
         when(amazonS3.getObject("bucket", "fileName")).thenReturn(mockS3Object);
 
-        var inputStreamOfKnownLength = fileStore.read(fileIdentifier);
+        var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier);
         assertEquals(10L, inputStreamOfKnownLength.getLength());
         verify(amazonS3).getObject("bucket", "fileName");
     }

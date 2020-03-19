@@ -31,11 +31,15 @@ public class FileService {
     }
 
     public UUID transferToPermanentStore(String originalFilename, InputStream inputStream) throws IOException {
-        return permanentFileStore.store(originalFilename, inputStream).getPersistedFileIdentifier().getFileId();
+        return permanentFileStore.uploadAsStream(originalFilename, inputStream).getPersistedFileIdentifier().getFileId();
+    }
+
+    public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
+        return permanentFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier().getFileId();
     }
 
     public UUID transferToEphemeralStore(String filename, InputStream inputStream) throws IOException {
-        return ephemeralFileStore.store(filename, inputStream).getPersistedFileIdentifier().getFileId();
+        return ephemeralFileStore.uploadAsStream(filename, inputStream).getPersistedFileIdentifier().getFileId();
     }
 
     public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
@@ -45,6 +49,6 @@ public class FileService {
     public InputStreamOfKnownLength stream(UUID fileId) throws IOException {
         PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(FileStoreType.PERMANENT) ? permanentFileStore : ephemeralFileStore;
-        return fileStore.stream(persistableFileMapping.getPersistedFileIdentifier());
+        return fileStore.downloadAsStream(persistableFileMapping.getPersistedFileIdentifier());
     }
 }
