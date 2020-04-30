@@ -1,15 +1,14 @@
 plugins {
-	id 'java'
-	id 'io.freefair.lombok' version '4.1.6'
-	id 'maven-publish'
-	id "com.jfrog.bintray" version "1.8.4"
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'io.freefair.lombok' version '4.1.6'
+    id 'java-library'
+    id 'maven-publish'
     id 'fr.brouillard.oss.gradle.jgitver' version '0.9.1'
+    id 'idea'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 }
 
 apply plugin: 'io.freefair.lombok'
-apply plugin: 'idea'
-apply plugin: 'io.spring.dependency-management'
 
 group = 'engineering.everest.starterkit'
 sourceCompatibility = '1.11'
@@ -49,12 +48,11 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
+    api "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
+
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "com.google.guava:guava:${guavaVersion}"
-    implementation "com.amazonaws:aws-java-sdk-s3:${awsSdkVersion}"
-    implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
