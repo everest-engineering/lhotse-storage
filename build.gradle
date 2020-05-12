@@ -1,7 +1,7 @@
 plugins {
     id 'com.palantir.git-version' version '0.12.3'
     id 'com.jfrog.bintray' version '1.8.4'
-    id 'io.freefair.lombok' version '4.1.6'
+    id 'io.freefair.lombok' version '5.0.1'
     id 'java-library'
     id 'maven-publish'
     id 'idea'
@@ -30,12 +30,12 @@ lombok {
 
 ext {
     awsSdkVersion = '1.11.740'
-    commonsLangVersion = '3.9'
-    guavaVersion = '28.1-jre'
-    springBootVersion = '2.2.5.RELEASE'
+    commonsLangVersion = '3.10'
+    guavaVersion = '29.0-jre'
+    springBootVersion = '2.2.7.RELEASE'
 
-    junitVersion = '5.6.0'
-    mockitoVersion = '3.2.4'
+    junitVersion = '5.6.2'
+    mockitoVersion = '3.3.3'
 }
 
 dependencyManagement {
