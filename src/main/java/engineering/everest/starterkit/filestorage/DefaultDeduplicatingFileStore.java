@@ -11,23 +11,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
+import static engineering.everest.starterkit.filestorage.FileStoreType.*;
 import static java.util.UUID.randomUUID;
 
-public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
+public class DefaultDeduplicatingFileStore {
 
-    private final FileStoreType fileStoreType;
-    private final FileMappingRepository fileMappingRepository;
-    private FileStore fileStore;
+    protected final FileStoreType fileStoreType;
+    protected final FileMappingRepository fileMappingRepository;
+    protected final FileStore fileStore;
 
-    public DefaultDeduplicatingFileStore(FileStoreType fileStoreType,
-                                         FileMappingRepository fileMappingRepository,
+    public DefaultDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
                                          FileStore fileStore) {
+        this.fileStoreType = PERMANENT;
+        this.fileMappingRepository = fileMappingRepository;
+        this.fileStore = fileStore;
+    }
+
+    protected DefaultDeduplicatingFileStore(FileStoreType fileStoreType,
+                                            FileMappingRepository fileMappingRepository,
+                                            FileStore fileStore) {
         this.fileStoreType = fileStoreType;
         this.fileMappingRepository = fileMappingRepository;
         this.fileStore = fileStore;
     }
 
-    @Override
     public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
         try (var countingInputStream = new CountingInputStream(inputStream);
              var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), countingInputStream);
@@ -39,7 +46,6 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
         }
     }
 
-    @Override
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
              var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
@@ -50,7 +56,6 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
         }
     }
 
-    @Override
     public InputStreamOfKnownLength downloadAsStream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
         return fileStore.downloadAsStream(persistedFileIdentifier.getNativeStorageFileId());
     }
@@ -59,16 +64,16 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
                                                                  String sha512,
                                                                  String fileIdentifier, long fileSizeBytes) {
         var persistedFile = deduplicateUploadedFile(fileIdentifier, sha256, sha512, fileSizeBytes, fileStore.nativeStorageType());
-        updateFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
+        addFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
         return persistedFile;
     }
 
     private PersistedFile deduplicateUploadedFile(String fileIdentifier, String uploadSha256, String uploadSha512,
-                                                  long fileSizeBytes, NativeStorageType nativeStorageType) {
+                                                    long fileSizeBytes, NativeStorageType nativeStorageType) {
         Optional<PersistableFileMapping> existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
 
         if (existingFileMapping.isPresent()) {
-            fileStore.delete(fileIdentifier);
+            deletePersistedFile(fileIdentifier);
             return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, existingFileMapping.get().getNativeStorageFileId(),
                     uploadSha256, uploadSha512, fileSizeBytes);
         } else {
@@ -77,7 +82,7 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
         }
     }
 
-    private Optional<PersistableFileMapping> searchForExistingFileMappingToBothHashes(String uploadSha256, String uploadSha512) {
+    protected Optional<PersistableFileMapping> searchForExistingFileMappingToBothHashes(String uploadSha256, String uploadSha512) {
         var fileMappingExample = new PersistableFileMapping();
         fileMappingExample.setSha256(uploadSha256);
         fileMappingExample.setSha512(uploadSha512);
@@ -85,8 +90,12 @@ public class DefaultDeduplicatingFileStore implements DeduplicatingFileStore {
         return matchingFiles.isEmpty() ? Optional.empty() : Optional.of(matchingFiles.get(0));
     }
 
-    private void updateFileMapping(PersistedFile persistedFile, long fileSizeBytes, NativeStorageType nativeStorageType) {
+    private void addFileMapping(PersistedFile persistedFile, long fileSizeBytes, NativeStorageType nativeStorageType) {
         fileMappingRepository.save(new PersistableFileMapping(persistedFile.getFileId(), fileStoreType, nativeStorageType,
-                persistedFile.getNativeStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes));
+                persistedFile.getNativeStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes, false));
+    }
+
+    private void deletePersistedFile(String fileIdentifier) {
+        fileStore.delete(fileIdentifier);
     }
 }

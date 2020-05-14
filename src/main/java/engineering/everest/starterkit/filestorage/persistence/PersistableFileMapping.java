@@ -25,6 +25,7 @@ public class PersistableFileMapping {
     private String sha256;
     private String sha512;
     private Long fileSizeBytes;
+    private boolean markedForDeletion;
 
     public PersistedFileIdentifier getPersistedFileIdentifier() {
         return new PersistedFileIdentifier(fileId, fileStoreType, nativeStorageType, nativeStorageFileId);

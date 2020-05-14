@@ -11,9 +11,12 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.InputStream;
 
+import static java.util.Set.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -66,5 +69,13 @@ class MongoGridFsFileStoreTest {
     @Test
     public void nativeStorageTypeIsMongoGridFs() {
         assertEquals(this.fileStore.nativeStorageType(), NativeStorageType.MONGO_GRID_FS);
+    }
+
+    @Test
+    public void deleteFiles_WillRemoveFilesFromGridFs() {
+        var fileIdentifiers = of("5e253b753496211048764352", "5e253b753496211048764351");
+        fileStore.deleteFiles(fileIdentifiers);
+
+        verify(gridFsTemplate).delete(query(where("_id").in(fileIdentifiers)));
     }
 }

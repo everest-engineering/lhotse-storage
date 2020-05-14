@@ -1,21 +1,32 @@
 package engineering.everest.starterkit.filestorage.filestores;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.NativeStorageType.AWS_S3;
+import static java.util.Arrays.asList;
+import static java.util.Set.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AwsS3FileStoreTest {
@@ -85,5 +96,25 @@ class AwsS3FileStoreTest {
     @Test
     public void nativeStorageTypeIsAwsS3() {
         assertEquals(AWS_S3, fileStore.nativeStorageType());
+    }
+
+    @Test
+    public void deleteFiles_WillDeleteFromTheS3Bucket() {
+        var fileIdentifiers = of("s3://bucket/fileName");
+
+        fileStore.deleteFiles(fileIdentifiers);
+
+        ArgumentCaptor<DeleteObjectsRequest> captor = ArgumentCaptor.forClass(DeleteObjectsRequest.class);
+        new DeleteObjectsRequest("bucket")
+                .withKeys(asList(new DeleteObjectsRequest.KeyVersion("fileName", "L4kqtJlcpXroDTDmpUMLUo")))
+                .withQuiet(false);
+        verify(amazonS3).deleteObjects(captor.capture());
+
+        DeleteObjectsRequest value = captor.getValue();
+        List<DeleteObjectsRequest.KeyVersion> keys = value.getKeys();
+        assertEquals("bucket", value.getBucketName());
+        assertFalse(value.getQuiet());
+        assertEquals("fileName", keys.get(0).getKey());
+        assertNull(keys.get(0).getVersion());
     }
 }
