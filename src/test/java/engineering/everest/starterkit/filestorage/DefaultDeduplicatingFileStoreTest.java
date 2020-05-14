@@ -41,13 +41,13 @@ class DefaultDeduplicatingFileStoreTest {
     private String fileIdentifier;
 
     @Mock
-    private FileStore fileStore;
+    protected FileStore fileStore;
     @Mock
-    private FileMappingRepository fileMappingRepository;
+    protected FileMappingRepository fileMappingRepository;
 
     @BeforeEach
     void setUp() {
-        defaultDeduplicatingFileStore = new DefaultDeduplicatingFileStore(PERMANENT, fileMappingRepository, fileStore);
+        defaultDeduplicatingFileStore = new DefaultDeduplicatingFileStore(fileMappingRepository, fileStore);
         fileIdentifier = "FILE_ID";
 
         when(fileStore.nativeStorageType()).thenReturn(MONGO_GRID_FS);
@@ -65,7 +65,7 @@ class DefaultDeduplicatingFileStoreTest {
         PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verifyNoMoreInteractions(fileStore);
-        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE));
+        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE, false));
         PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier, SHA_256, SHA_512, FILE_SIZE);
         assertEquals(expectedPersistedFile, persistedFile);
     }
@@ -80,14 +80,14 @@ class DefaultDeduplicatingFileStoreTest {
         });
 
         when(fileMappingRepository.findAll(any(Example.class))).thenReturn(
-                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
-                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
-                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
+                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
         PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verify(fileStore).delete(fileIdentifier);
-        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));
+        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false));
         PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE);
         assertEquals(expectedPersistedFile, persistedFile);
     }
@@ -102,14 +102,14 @@ class DefaultDeduplicatingFileStoreTest {
         });
 
         when(fileMappingRepository.findAll(any(Example.class))).thenReturn(
-                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
-                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE),
-                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE)));
+                List.of(new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false),
+                        new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
         PersistedFile persistedFile = defaultDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, FILE_SIZE, createTempFileWithContents());
 
         verify(fileStore).delete(fileIdentifier);
-        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE));
+        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false));
         PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE);
         assertEquals(expectedPersistedFile, persistedFile);
     }

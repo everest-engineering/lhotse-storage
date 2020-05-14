@@ -38,9 +38,9 @@ class FileServiceTest {
     @Mock
     private FileMappingRepository fileMappingRepository;
     @Mock
-    private DeduplicatingFileStore permanentFileStore;
+    private DefaultDeduplicatingFileStore permanentFileStore;
     @Mock
-    private DeduplicatingFileStore ephemeralFileStore;
+    private EphemeralDeduplicatingFileStore ephemeralFileStore;
 
     @BeforeEach
     void setUp() {
@@ -98,7 +98,7 @@ class FileServiceTest {
     void stream_WillDelegateToPermanentFileStore_WhenFileMapsToPermanentStore() throws IOException {
         UUID fileId = randomUUID();
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
@@ -111,7 +111,7 @@ class FileServiceTest {
     void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
         UUID fileId = randomUUID();
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));

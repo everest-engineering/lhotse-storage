@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
@@ -51,5 +52,10 @@ public class MongoGridFsFileStore implements FileStore {
     @Override
     public NativeStorageType nativeStorageType() {
         return MONGO_GRID_FS;
+    }
+
+    @Override
+    public void deleteFiles(Set<String> fileIdentifiers) {
+        gridFs.delete(query(where("_id").in(fileIdentifiers)));
     }
 }

@@ -2,6 +2,8 @@ package engineering.everest.starterkit.filestorage.filestores;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import engineering.everest.starterkit.filestorage.FileStore;
@@ -9,9 +11,12 @@ import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import engineering.everest.starterkit.filestorage.NativeStorageType;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.Set;
 
 import static engineering.everest.starterkit.filestorage.NativeStorageType.AWS_S3;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 public class AwsS3FileStore implements FileStore {
 
@@ -56,6 +61,18 @@ public class AwsS3FileStore implements FileStore {
     @Override
     public NativeStorageType nativeStorageType() {
         return AWS_S3;
+    }
+
+    @Override
+    public void deleteFiles(Set<String> fileIdentifiers) {
+        List<KeyVersion> keyVersions = fileIdentifiers.stream().map(fileIdentifier -> {
+            AmazonS3URI s3URI = new AmazonS3URI(fileIdentifier);
+            return new KeyVersion(s3URI.getKey(), s3URI.getVersionId());
+        }).collect(toList());
+        DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
+                .withKeys(keyVersions)
+                .withQuiet(false);
+        amazonS3.deleteObjects(multiObjectDeleteRequest);
     }
 
     private String streamToS3(InputStream inputStream, String fileName, ObjectMetadata o) {

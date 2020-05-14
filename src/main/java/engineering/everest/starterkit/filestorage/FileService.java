@@ -13,12 +13,12 @@ import static java.nio.file.Files.createTempFile;
 public class FileService {
 
     private final FileMappingRepository fileMappingRepository;
-    private final DeduplicatingFileStore permanentFileStore;
-    private final DeduplicatingFileStore ephemeralFileStore;
+    private final DefaultDeduplicatingFileStore permanentFileStore;
+    private final EphemeralDeduplicatingFileStore ephemeralFileStore;
 
     public FileService(FileMappingRepository fileMappingRepository,
-                       DeduplicatingFileStore permanentFileStore,
-                       DeduplicatingFileStore ephemeralFileStore) {
+                       DefaultDeduplicatingFileStore permanentFileStore,
+                       EphemeralDeduplicatingFileStore ephemeralFileStore) {
         this.fileMappingRepository = fileMappingRepository;
         this.permanentFileStore = permanentFileStore;
         this.ephemeralFileStore = ephemeralFileStore;
