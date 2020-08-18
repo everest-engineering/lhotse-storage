@@ -1,5 +1,5 @@
 # File storage support for Lhotse
-[![Build Status](https://travis-ci.com/everest-engineering/lhotse-storage.svg?branch=master)](https://travis-ci.com/everest-engineering/lhotse-storage)
+[![Build Status](https://travis-ci.com/everest-engineering/lhotse-storage.svg?branch=master)](https://travis-ci.com/everest-engineering/lhotse-storage) ![Latest release](https://img.shields.io/github/v/release/everest-engineering/lhotse-storage)
 
 This is a supporting repository for [Lhotse](https://github.com/everest-engineering/lhotse), a starter kit for writing event sourced web applications following domain driven design principles.
 
