@@ -23,7 +23,7 @@ test {
 }
 
 lombok {
-    version = "1.18.12"
+    version = "1.18.16"
     generateLombokConfig.enabled = false
 }
 
@@ -31,7 +31,7 @@ ext {
     awsSdkVersion = '1.11.887'
     commonsLangVersion = '3.11'
     guavaVersion = '30.0-jre'
-    springBootVersion = '2.3.4.RELEASE'
+    springBootVersion = '2.4.0'
 
     junitVersion = '5.7.0'
     mockitoVersion = '3.5.15'
