@@ -13,21 +13,24 @@ import org.springframework.context.annotation.Configuration;
 public class DeduplicatingFileStoreConfig {
 
     @Bean
+    @Qualifier("permanentDeduplicatingFileStore")
     DefaultDeduplicatingFileStore permanentFileStore(FileMappingRepository fileMappingRepository,
                                                      @Qualifier("permanentFileStore") FileStore fileStore) {
         return new DefaultDeduplicatingFileStore(fileMappingRepository, fileStore);
     }
 
     @Bean
+    @Qualifier("ephemeralDeduplicatingFileStore")
     EphemeralDeduplicatingFileStore ephemeralFileStore(FileMappingRepository fileMappingRepository,
                                                        @Qualifier("ephemeralFileStore") FileStore fileStore) {
         return new EphemeralDeduplicatingFileStore(fileMappingRepository, fileStore);
     }
 
     @Bean
-    public FileService fileService(FileMappingRepository fileMappingRepository,
-                                   DefaultDeduplicatingFileStore permanentDeduplicatingFileStore,
-                                   EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore) {
+    public FileService fileService(
+            FileMappingRepository fileMappingRepository,
+            @Qualifier("permanentDeduplicatingFileStore") DefaultDeduplicatingFileStore permanentDeduplicatingFileStore,
+            @Qualifier("ephemeralDeduplicatingFileStore") EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore) {
         return new FileService(fileMappingRepository, permanentDeduplicatingFileStore, ephemeralDeduplicatingFileStore);
     }
 }

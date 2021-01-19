@@ -3,7 +3,6 @@ package engineering.everest.starterkit.filestorage;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
@@ -16,14 +15,12 @@ public class EphemeralDeduplicatingFileStore extends DefaultDeduplicatingFileSto
     }
 
     public void deleteFiles(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
-        persistedFileIdentifiers.forEach(persistedFileIdentifier -> deleteFile(persistedFileIdentifier));
+        persistedFileIdentifiers.forEach(this::deleteFile);
     }
 
     public void deleteFile(PersistedFileIdentifier persistedFileIdentifier) {
-        Optional<PersistableFileMapping> optionalPersistableFileMapping = fileMappingRepository.findById(persistedFileIdentifier.getFileId());
-        if (optionalPersistableFileMapping.isPresent()) {
-            markPersistedFileForDeletion(optionalPersistableFileMapping.get());
-        }
+        fileMappingRepository.findById(persistedFileIdentifier.getFileId())
+                .ifPresent(this::markPersistedFileForDeletion);
     }
 
     private void markPersistedFileForDeletion(PersistableFileMapping persistableFileMapping) {
