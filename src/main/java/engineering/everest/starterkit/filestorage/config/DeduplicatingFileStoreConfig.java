@@ -1,9 +1,9 @@
 package engineering.everest.starterkit.filestorage.config;
 
-import engineering.everest.starterkit.filestorage.DefaultDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.EphemeralDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.FileService;
 import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +14,9 @@ public class DeduplicatingFileStoreConfig {
 
     @Bean
     @Qualifier("permanentDeduplicatingFileStore")
-    DefaultDeduplicatingFileStore permanentFileStore(FileMappingRepository fileMappingRepository,
-                                                     @Qualifier("permanentFileStore") FileStore fileStore) {
-        return new DefaultDeduplicatingFileStore(fileMappingRepository, fileStore);
+    PermanentDeduplicatingFileStore permanentFileStore(FileMappingRepository fileMappingRepository,
+                                                       @Qualifier("permanentFileStore") FileStore fileStore) {
+        return new PermanentDeduplicatingFileStore(fileMappingRepository, fileStore);
     }
 
     @Bean
@@ -29,7 +29,7 @@ public class DeduplicatingFileStoreConfig {
     @Bean
     public FileService fileService(
             FileMappingRepository fileMappingRepository,
-            @Qualifier("permanentDeduplicatingFileStore") DefaultDeduplicatingFileStore permanentDeduplicatingFileStore,
+            @Qualifier("permanentDeduplicatingFileStore") PermanentDeduplicatingFileStore permanentDeduplicatingFileStore,
             @Qualifier("ephemeralDeduplicatingFileStore") EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore) {
         return new FileService(fileMappingRepository, permanentDeduplicatingFileStore, ephemeralDeduplicatingFileStore);
     }

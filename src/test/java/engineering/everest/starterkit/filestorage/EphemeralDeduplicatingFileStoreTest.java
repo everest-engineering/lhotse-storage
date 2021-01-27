@@ -8,15 +8,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
+import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -44,12 +45,12 @@ class EphemeralDeduplicatingFileStoreTest {
     }
 
     @Test
-    void deleteFile_WillMarkFileForDeletionInFileMappingRepository() throws IOException {
+    void deleteFile_WillMarkFileForDeletionInFileMappingRepository() {
         UUID uuid = randomUUID();
         UUID uuid2 = randomUUID();
         when(fileMappingRepository.findById(uuid)).thenReturn(of(new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(uuid, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
+        var persistedFileIdentifier = new PersistedFileIdentifier(uuid, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
         ephemeralDeduplicatingFileStore.deleteFile(persistedFileIdentifier);
 
@@ -58,11 +59,11 @@ class EphemeralDeduplicatingFileStoreTest {
     }
 
     @Test
-    void deleteFile_WillDoNothingIfFileMappingDoesNotExist() throws IOException {
+    void deleteFile_WillDoNothingIfFileMappingDoesNotExist() {
         UUID fileId = randomUUID();
         when(fileMappingRepository.findById(fileId)).thenReturn(Optional.empty());
 
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
         ephemeralDeduplicatingFileStore.deleteFile(persistedFileIdentifier);
 
@@ -71,16 +72,23 @@ class EphemeralDeduplicatingFileStoreTest {
     }
 
     @Test
-    void deleteFiles_WillMarkFilesForDeletionInFileMappingRepository() throws IOException {
+    void deleteFiles_WillMarkFilesForDeletionInFileMappingRepository() {
         UUID fileId = randomUUID();
         when(fileMappingRepository.findById(fileId)).thenReturn(of(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
         ephemeralDeduplicatingFileStore.deleteFiles(Set.of(persistedFileIdentifier));
 
         verifyNoInteractions(fileStore);
         verify(fileMappingRepository).save(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true));
+    }
 
+    @Test
+    void deleteFiles_WillFail_WhenFileIsNotEphemeral() {
+        var persistedFileIdentifier = new PersistedFileIdentifier(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
+
+        assertThrows(IllegalArgumentException.class, () ->
+                ephemeralDeduplicatingFileStore.deleteFiles(Set.of(persistedFileIdentifier)));
     }
 }

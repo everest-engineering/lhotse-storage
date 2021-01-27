@@ -11,30 +11,48 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import static engineering.everest.starterkit.filestorage.FileStoreType.*;
+import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
 import static java.util.UUID.randomUUID;
 
-public class DefaultDeduplicatingFileStore {
+/**
+ * File store that removes duplicate copies of files and manages the mapping of individual file uploads
+ * to a single backing file.
+ * <p>
+ * This default implementation does not support file deletion. It is intended to be used as a permanent file store.
+ *
+ * @see EphemeralDeduplicatingFileStore
+ */
+public class PermanentDeduplicatingFileStore {
 
     protected final FileStoreType fileStoreType;
     protected final FileMappingRepository fileMappingRepository;
     protected final FileStore fileStore;
 
-    public DefaultDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
-                                         FileStore fileStore) {
+    public PermanentDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
+                                           FileStore fileStore) {
         this.fileStoreType = PERMANENT;
         this.fileMappingRepository = fileMappingRepository;
         this.fileStore = fileStore;
     }
 
-    protected DefaultDeduplicatingFileStore(FileStoreType fileStoreType,
-                                            FileMappingRepository fileMappingRepository,
-                                            FileStore fileStore) {
+    protected PermanentDeduplicatingFileStore(FileStoreType fileStoreType,
+                                              FileMappingRepository fileMappingRepository,
+                                              FileStore fileStore) {
         this.fileStoreType = fileStoreType;
         this.fileMappingRepository = fileMappingRepository;
         this.fileStore = fileStore;
     }
 
+    /**
+     * Stream a file of unknown length to the file store, recording its name.
+     * <p>
+     * <b>If possible, prefer to call the overloaded method that includes the length of the file. Depending
+     * on the backing file store implementation, this method may introduce performance overheads.</b>
+     *
+     * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
+     * @param inputStream containing content to upload. Managed by the caller.
+     * @return persisted file information
+     */
     public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
         try (var countingInputStream = new CountingInputStream(inputStream);
              var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), countingInputStream);
@@ -46,6 +64,16 @@ public class DefaultDeduplicatingFileStore {
         }
     }
 
+    /**
+     * Stream a file to the file store, recording its name.
+     * <p>
+     * Callers are responsible for closing the input stream.
+     *
+     * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
+     * @param fileSize in bytes
+     * @param inputStream containing content to upload. Managed by the caller.
+     * @return persisted file information
+     */
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
              var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
@@ -56,6 +84,15 @@ public class DefaultDeduplicatingFileStore {
         }
     }
 
+    /**
+     * Streaming download.
+     * <p>
+     * Callers are responsible for closing the returned input stream.
+     *
+     * @param persistedFileIdentifier returned when a file was uploaded to the file store
+     * @return an input stream of known length
+     * @throws IOException if the file doesn't exist or could not be read
+     */
     public InputStreamOfKnownLength downloadAsStream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
         return fileStore.downloadAsStream(persistedFileIdentifier.getNativeStorageFileId());
     }

@@ -38,7 +38,7 @@ class FileServiceTest {
     @Mock
     private FileMappingRepository fileMappingRepository;
     @Mock
-    private DefaultDeduplicatingFileStore permanentFileStore;
+    private PermanentDeduplicatingFileStore permanentFileStore;
     @Mock
     private EphemeralDeduplicatingFileStore ephemeralFileStore;
 
@@ -49,7 +49,7 @@ class FileServiceTest {
 
     @Test
     void createTempFile_WillCreateATemporaryFileMarkedAsDeleteOnExit() throws IOException {
-        File temporaryFile = fileService.createTemporaryFile();
+        File temporaryFile = fileService.createTemporaryFile("upload");
 
         assertTrue(temporaryFile.canWrite());
         assertTrue(temporaryFile.canRead());
@@ -59,7 +59,7 @@ class FileServiceTest {
     void transferToPermanentStorE_WillDelegateToPermanentStore() throws IOException {
         when(permanentFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile();
+        File tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToPermanentStore(ORIGINAL_FILENAME, inputStream);
             verify(permanentFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
@@ -72,7 +72,7 @@ class FileServiceTest {
     void transferToEphemeralStore_WillDelegateToEphemeralStore() throws IOException {
         when(ephemeralFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile();
+        File tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(ORIGINAL_FILENAME, inputStream);
             verify(ephemeralFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
@@ -85,7 +85,7 @@ class FileServiceTest {
     void transferToEphemeralStore_WillDelegateToEphemeralStore_WhenNoFilenamespecified() throws IOException {
         when(ephemeralFileStore.uploadAsStream(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile();
+        File tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(inputStream);
             verify(ephemeralFileStore).uploadAsStream("", inputStream);
