@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
@@ -32,6 +33,8 @@ import static org.mockito.Mockito.when;
 class FileServiceTest {
 
     private static final String ORIGINAL_FILENAME = "original-filename";
+
+    private static final int BATCH_SIZE = 50;
 
     private FileService fileService;
 
@@ -102,7 +105,7 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.downloadAsStream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(permanentFileStore.downloadAsStream(persistableFileMapping)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
     }
@@ -115,8 +118,43 @@ class FileServiceTest {
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.downloadAsStream(persistedFileIdentifier)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(ephemeralFileStore.downloadAsStream(persistableFileMapping)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
+    }
+
+    @Test
+    void markFileForDeletion_WillDelegateToEphemeralFileStore() {
+        UUID fileId = randomUUID();
+        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+
+        fileService.markFileForDeletion(persistedFileIdentifier);
+
+        verify(ephemeralFileStore).markFileForDeletion(persistedFileIdentifier);
+    }
+
+    @Test
+    void markFilesForDeletion_WillDelegateToEphemeralFileStore() {
+        UUID fileId = randomUUID();
+        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        Set<PersistedFileIdentifier> persistedFileIdentifier1 = Set.of(persistedFileIdentifier);
+
+        fileService.markFilesForDeletion(persistedFileIdentifier1);
+
+        verify(ephemeralFileStore).markFilesForDeletion(persistedFileIdentifier1);
+    }
+
+    @Test
+    void markAllFilesForDeletion_WillDelegateToEphemeralFileStore() {
+        fileService.markAllFilesForDeletion();
+
+        verify(ephemeralFileStore).markAllFilesForDeletion();
+    }
+
+    @Test
+    void deleteFileBatch_WillDelegateToEphemeralFileStore() {
+        fileService.deleteFileBatch(BATCH_SIZE);
+
+        verify(ephemeralFileStore).deleteFileBatch(BATCH_SIZE);
     }
 }

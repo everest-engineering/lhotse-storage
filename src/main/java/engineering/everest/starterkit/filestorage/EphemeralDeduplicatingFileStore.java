@@ -2,11 +2,17 @@ package engineering.everest.starterkit.filestorage;
 
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
+import org.springframework.data.domain.Pageable;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
+import static java.util.stream.Collectors.toSet;
+import static org.springframework.data.domain.PageRequest.of;
 
 /**
  * File store that removes duplicate copies of files and manages the mapping of individual file uploads
@@ -24,27 +30,39 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
         super(EPHEMERAL, fileMappingRepository, fileStore);
     }
 
-    /**
-     * Delete a set of files
-     *
-     * @param persistedFileIdentifiers of the files to be deleted
-     * @throws IllegalArgumentException when a file is not ephemeral
-     */
-    public void deleteFiles(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
-        persistedFileIdentifiers.forEach(this::deleteFile);
+    @Override
+    public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
+        if (persistableFileMapping.isMarkedForDeletion()) {
+            throw new NoSuchElementException("Ephemeral file not found");
+        }
+        return super.downloadAsStream(persistableFileMapping);
     }
 
-    /**
-     * Delete a single file
-     *
-     * @param persistedFileIdentifier of the file to be deleted
-     * @throws IllegalArgumentException when the file is not ephemeral
-     */
-    public void deleteFile(PersistedFileIdentifier persistedFileIdentifier) {
+    public void markFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
+        persistedFileIdentifiers.forEach(this::markFileForDeletion);
+    }
+
+    public void markFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {
         checkArgument(persistedFileIdentifier.getFileStoreType() == EPHEMERAL);
 
         fileMappingRepository.findById(persistedFileIdentifier.getFileId())
                 .ifPresent(this::markPersistedFileForDeletion);
+    }
+
+    public void markAllFilesForDeletion() {
+        List<PersistableFileMapping> persistableFileMappings = fileMappingRepository.findAll();
+        persistableFileMappings.forEach(persistableFileMapping -> persistableFileMapping.setMarkedForDeletion(true));
+        fileMappingRepository.saveAll(persistableFileMappings);
+    }
+
+    public void deleteFileBatch(int batchSize) {
+        Pageable pageable = of(0, batchSize);
+        Set<String> filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
+                .map(persistableFileMapping -> persistableFileMapping.getNativeStorageFileId())
+                .collect(toSet());
+
+        fileStore.deleteFiles(filesInBatch);
+        fileMappingRepository.deleteAllByNativeStorageFileIdIn(filesInBatch);
     }
 
     private void markPersistedFileForDeletion(PersistableFileMapping persistableFileMapping) {

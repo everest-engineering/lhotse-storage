@@ -50,7 +50,7 @@ public class PermanentDeduplicatingFileStore {
      * on the backing file store implementation, this method may introduce performance overheads.</b>
      *
      * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
-     * @param inputStream containing content to upload. Managed by the caller.
+     * @param inputStream      containing content to upload. Managed by the caller.
      * @return persisted file information
      */
     public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
@@ -70,8 +70,8 @@ public class PermanentDeduplicatingFileStore {
      * Callers are responsible for closing the input stream.
      *
      * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
-     * @param fileSize in bytes
-     * @param inputStream containing content to upload. Managed by the caller.
+     * @param fileSize         in bytes
+     * @param inputStream      containing content to upload. Managed by the caller.
      * @return persisted file information
      */
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
@@ -89,11 +89,12 @@ public class PermanentDeduplicatingFileStore {
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
-     * @param persistedFileIdentifier returned when a file was uploaded to the file store
+     * @param persistableFileMapping returned when a file was uploaded to the file store
      * @return an input stream of known length
      * @throws IOException if the file doesn't exist or could not be read
      */
-    public InputStreamOfKnownLength downloadAsStream(PersistedFileIdentifier persistedFileIdentifier) throws IOException {
+    public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
+        PersistedFileIdentifier persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
         return fileStore.downloadAsStream(persistedFileIdentifier.getNativeStorageFileId());
     }
 
@@ -106,7 +107,7 @@ public class PermanentDeduplicatingFileStore {
     }
 
     private PersistedFile deduplicateUploadedFile(String fileIdentifier, String uploadSha256, String uploadSha512,
-                                                    long fileSizeBytes, NativeStorageType nativeStorageType) {
+                                                  long fileSizeBytes, NativeStorageType nativeStorageType) {
         Optional<PersistableFileMapping> existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
 
         if (existingFileMapping.isPresent()) {
@@ -123,6 +124,7 @@ public class PermanentDeduplicatingFileStore {
         var fileMappingExample = new PersistableFileMapping();
         fileMappingExample.setSha256(uploadSha256);
         fileMappingExample.setSha512(uploadSha512);
+        fileMappingExample.setMarkedForDeletion(false);
         var matchingFiles = fileMappingRepository.findAll(Example.of(fileMappingExample));
         return matchingFiles.isEmpty() ? Optional.empty() : Optional.of(matchingFiles.get(0));
     }

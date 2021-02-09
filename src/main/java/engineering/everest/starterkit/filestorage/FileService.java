@@ -6,6 +6,7 @@ import engineering.everest.starterkit.filestorage.persistence.PersistableFileMap
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
@@ -46,7 +47,7 @@ public class FileService {
      * Streaming upload of a named file to the permanent file store. File length is derived from reading the input stream.
      *
      * @param originalFilename to record for the file
-     * @param inputStream to read from. Must be closed by the caller.
+     * @param inputStream      to read from. Must be closed by the caller.
      * @return UUID assigned to this file.
      */
     public UUID transferToPermanentStore(String originalFilename, InputStream inputStream) throws IOException {
@@ -57,7 +58,7 @@ public class FileService {
      * Streaming upload of a named file to the permanent file store. File length is provided by the caller.
      *
      * @param originalFilename to record for the file
-     * @param inputStream to read from. Must be closed by the caller.
+     * @param inputStream      to read from. Must be closed by the caller.
      * @return UUID assigned to this file.
      */
     public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
@@ -67,7 +68,7 @@ public class FileService {
     /**
      * Streaming upload of a named file to the ephemeral file store. File length is derived from reading the input stream.
      *
-     * @param filename to record for the file
+     * @param filename    to record for the file
      * @param inputStream to read from. Must be closed by the caller.
      * @return UUID assigned to this file.
      */
@@ -97,6 +98,42 @@ public class FileService {
         var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT)
                 ? permanentDeduplicatingFileStore
                 : ephemeralDeduplicatingFileStore;
-        return fileStore.downloadAsStream(persistableFileMapping.getPersistedFileIdentifier());
+        return fileStore.downloadAsStream(persistableFileMapping);
+    }
+
+    /**
+     * Marking ephemeral files for deletion
+     *
+     * @param persistedFileIdentifiers to mark for deletion
+     * @throws IllegalArgumentException if the file is not ephemeral
+     */
+    public void markFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
+        ephemeralDeduplicatingFileStore.markFilesForDeletion(persistedFileIdentifiers);
+    }
+
+    /**
+     * Mark an ephemeral file for deletion
+     *
+     * @param persistedFileIdentifier to mark for deletion
+     * @throws IllegalArgumentException if the file is not ephemeral
+     */
+    public void markFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {
+        ephemeralDeduplicatingFileStore.markFileForDeletion(persistedFileIdentifier);
+    }
+
+    /**
+     * Marks all ephemeral files for deletion
+     */
+    public void markAllFilesForDeletion() {
+        ephemeralDeduplicatingFileStore.markAllFilesForDeletion();
+    }
+
+    /**
+     * Delete ephemeral files in a batch
+     *
+     * @param batchSize is the number of files to delete
+     */
+    public void deleteFileBatch(int batchSize) {
+        ephemeralDeduplicatingFileStore.deleteFileBatch(batchSize);
     }
 }
