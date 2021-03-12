@@ -32,5 +32,5 @@ steps:
       java: 11
     commands:
       - git fetch --tags
-      - ./gradlew publish --console plain
+      - ./gradlew publishReleasePublicationToMavenCentralRepository --console plain
 
