@@ -1,5 +1,5 @@
 # File storage support for Lhotse
-[![Build status](https://badge.buildkite.com/d5a0c236b0dd90d368dd448f4010eaee15d409f5c6c8a20b2a.svg)](https://buildkite.com/everest-engineering/lhotse-storage) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=everest-engineering_lhotse-storage&metric=alert_status)](https://sonarcloud.io/dashboard?id=everest-engineering_lhotse-storage)
+[![Build status](https://badge.buildkite.com/d5a0c236b0dd90d368dd448f4010eaee15d409f5c6c8a20b2a.svg?branch=main)](https://buildkite.com/everest-engineering/lhotse-storage) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=everest-engineering_lhotse-storage&metric=alert_status)](https://sonarcloud.io/dashboard?id=everest-engineering_lhotse-storage)
 
 This is a supporting repository for [Lhotse](https://github.com/everest-engineering/lhotse), a starter kit for writing event sourced web applications following domain driven design principles.
 

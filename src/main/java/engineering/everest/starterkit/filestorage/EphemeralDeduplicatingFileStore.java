@@ -58,7 +58,7 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
     public void deleteFileBatch(int batchSize) {
         Pageable pageable = of(0, batchSize);
         Set<String> filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
-                .map(persistableFileMapping -> persistableFileMapping.getNativeStorageFileId())
+                .map(PersistableFileMapping::getNativeStorageFileId)
                 .collect(toSet());
 
         fileStore.deleteFiles(filesInBatch);
