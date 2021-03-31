@@ -9,6 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -20,6 +23,7 @@ import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT
 import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -125,5 +129,17 @@ class EphemeralDeduplicatingFileStoreTest {
         PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
 
         assertThrows(NoSuchElementException.class, () -> ephemeralDeduplicatingFileStore.downloadAsStream(persistableFileMapping));
+    }
+
+    @Test
+    public void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
+        when(fileStore.downloadAsStream(EXISTING_NATIVE_STORE_FILE_ID)).thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
+
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+        InputStreamOfKnownLength inputStreamOfKnownLength = ephemeralDeduplicatingFileStore.downloadAsStream(persistableFileMapping);
+
+        assertEquals(inputStreamOfKnownLength.getLength(), FILE_SIZE);
+        assertEquals(inputStreamOfKnownLength.getInputStream(), inputStream);
     }
 }

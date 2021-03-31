@@ -30,9 +30,7 @@ public class PermanentDeduplicatingFileStore {
 
     public PermanentDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
                                            FileStore fileStore) {
-        this.fileStoreType = PERMANENT;
-        this.fileMappingRepository = fileMappingRepository;
-        this.fileStore = fileStore;
+        this(PERMANENT, fileMappingRepository, fileStore);
     }
 
     protected PermanentDeduplicatingFileStore(FileStoreType fileStoreType,
