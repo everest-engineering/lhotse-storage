@@ -10,7 +10,6 @@ plugins {
 }
 
 group = 'engineering.everest.starterkit'
-sourceCompatibility = '1.11'
 
 def gitTagVersion = versionDetails()
 version = gitTagVersion.commitDistance == 0
@@ -20,12 +19,12 @@ version = gitTagVersion.commitDistance == 0
 ext {
     awsSdkVersion = '1.11.887'
     commonsLangVersion = '3.11'
-    guavaVersion = '30.1.1-jre'
-    lombokVersion = '1.18.20'
-    springBootVersion = '2.4.8'
+    guavaVersion = '31.0.1-jre'
+    lombokVersion = '1.18.22'
+    springBootVersion = '2.6.0'
 
-    junitVersion = '5.7.2'
-    mockitoVersion = '3.11.2'
+    junitVersion = '5.8.1'
+    mockitoVersion = '4.0.0'
 }
 
 dependencyManagement {
@@ -51,6 +50,9 @@ dependencies {
 }
 
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
     java {
         withJavadocJar()
         withSourcesJar()
