@@ -101,26 +101,32 @@ class FileServiceTest {
     void stream_WillDelegateToPermanentFileStore_WhenFileMapsToPermanentStore() throws IOException {
         UUID fileId = randomUUID();
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
+        PersistableFileMapping persistableFileMapping =
+            new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.downloadAsStream(persistableFileMapping)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(permanentFileStore.downloadAsStream(persistableFileMapping))
+            .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
-        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
+        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
+            fileService.stream(persistedFileIdentifier.getFileId()));
     }
 
     @Test
     void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
         UUID fileId = randomUUID();
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
+        PersistableFileMapping persistableFileMapping =
+            new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
         ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.downloadAsStream(persistableFileMapping)).thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
+        when(ephemeralFileStore.downloadAsStream(persistableFileMapping))
+            .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
-        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L), fileService.stream(persistedFileIdentifier.getFileId()));
+        assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
+            fileService.stream(persistedFileIdentifier.getFileId()));
     }
 
     @Test

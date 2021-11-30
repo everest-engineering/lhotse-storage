@@ -13,5 +13,5 @@ public interface FileMappingRepository extends JpaRepository<PersistableFileMapp
 
     List<PersistableFileMapping> findByMarkedForDeletionTrue(Pageable pageable);
 
-    void deleteAllByNativeStorageFileIdIn(Set<String> nativeStorageFileIds) ;
+    void deleteAllByNativeStorageFileIdIn(Set<String> nativeStorageFileIds);
 }

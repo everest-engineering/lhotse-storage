@@ -28,9 +28,9 @@ public class DeduplicatingFileStoreConfig {
 
     @Bean
     public FileService fileService(
-            FileMappingRepository fileMappingRepository,
-            @Qualifier("permanentDeduplicatingFileStore") PermanentDeduplicatingFileStore permanentDeduplicatingFileStore,
-            @Qualifier("ephemeralDeduplicatingFileStore") EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore) {
+                                   FileMappingRepository fileMappingRepository,
+                                   @Qualifier("permanentDeduplicatingFileStore") PermanentDeduplicatingFileStore permanentDeduplicatingFileStore,
+                                   @Qualifier("ephemeralDeduplicatingFileStore") EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore) {
         return new FileService(fileMappingRepository, permanentDeduplicatingFileStore, ephemeralDeduplicatingFileStore);
     }
 }

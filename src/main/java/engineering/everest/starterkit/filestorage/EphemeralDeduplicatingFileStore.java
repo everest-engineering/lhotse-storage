@@ -15,11 +15,10 @@ import static java.util.stream.Collectors.toSet;
 import static org.springframework.data.domain.PageRequest.of;
 
 /**
- * File store that removes duplicate copies of files and manages the mapping of individual file uploads
- * to a single backing file.
+ * File store that removes duplicate copies of files and manages the mapping of individual file uploads to a single backing file.
  * <p>
- * This implementation augments the default deduplicating file store by adding the ability to delete.
- * It can not be used to delete files added by the base class.
+ * This implementation augments the default deduplicating file store by adding the ability to delete. It can not be used to delete files
+ * added by the base class.
  *
  * @see PermanentDeduplicatingFileStore
  */
@@ -46,7 +45,7 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
         checkArgument(persistedFileIdentifier.getFileStoreType() == EPHEMERAL);
 
         fileMappingRepository.findById(persistedFileIdentifier.getFileId())
-                .ifPresent(this::markPersistedFileForDeletion);
+            .ifPresent(this::markPersistedFileForDeletion);
     }
 
     public void markAllFilesForDeletion() {
@@ -58,8 +57,8 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
     public void deleteFileBatch(int batchSize) {
         Pageable pageable = of(0, batchSize);
         Set<String> filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
-                .map(PersistableFileMapping::getNativeStorageFileId)
-                .collect(toSet());
+            .map(PersistableFileMapping::getNativeStorageFileId)
+            .collect(toSet());
 
         fileStore.deleteFiles(filesInBatch);
         fileMappingRepository.deleteAllByNativeStorageFileIdIn(filesInBatch);

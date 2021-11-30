@@ -13,7 +13,7 @@ class InputStreamOfKnownLengthTest {
     void isAutoCloseable() {
         List<AnnotatedType> annotatedTypes = asList(InputStreamOfKnownLength.class.getAnnotatedInterfaces());
         annotatedTypes.stream().filter(x -> x.getType().equals(AutoCloseable.class))
-                .findFirst()
-                .orElseThrow();
+            .findFirst()
+            .orElseThrow();
     }
 }

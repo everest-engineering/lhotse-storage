@@ -16,14 +16,14 @@ public interface FileStore {
     /**
      * Stream a file of unknown length to the file store, recording its name.
      * <p>
-     * <b>If possible, prefer to call the overloaded method that includes the length of the file. Depending
-     * on the backing file store implementation, this method may introduce performance overheads.</b>
+     * <b>If possible, prefer to call the overloaded method that includes the length of the file. Depending on the backing file store
+     * implementation, this method may introduce performance overheads.</b>
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
-     * @param inputStream containing content to upload. Managed by the caller.
-     * @param fileName to record. Typically the original filename a user would associate with the file contents.
-     * @return a unique string identifying the file. The format is dependent on the backing file store implementation.
+     * @param  inputStream containing content to upload. Managed by the caller.
+     * @param  fileName    to record. Typically the original filename a user would associate with the file contents.
+     * @return             a unique string identifying the file. The format is dependent on the backing file store implementation.
      */
     String uploadStream(InputStream inputStream, String fileName);
 
@@ -32,10 +32,10 @@ public interface FileStore {
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
-     * @param inputStream containing content to upload. Managed by the caller.
-     * @param fileName to record. Typically the original filename a user would associate with the file contents.
-     * @param fileSize in bytes
-     * @return a unique string identifying the file. The format is dependent on the backing file store implementation.
+     * @param  inputStream containing content to upload. Managed by the caller.
+     * @param  fileName    to record. Typically the original filename a user would associate with the file contents.
+     * @param  fileSize    in bytes
+     * @return             a unique string identifying the file. The format is dependent on the backing file store implementation.
      */
     String uploadStream(InputStream inputStream, String fileName, long fileSize);
 
@@ -51,9 +51,9 @@ public interface FileStore {
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
-     * @param fileIdentifier returned when a file was uploaded to the file store
-     * @return an input stream of known length
-     * @throws IOException if the file doesn't exist or could not be read
+     * @param  fileIdentifier returned when a file was uploaded to the file store
+     * @return                an input stream of known length
+     * @throws IOException    if the file doesn't exist or could not be read
      */
     InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException;
 

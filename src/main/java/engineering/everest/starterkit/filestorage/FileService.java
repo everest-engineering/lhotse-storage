@@ -30,11 +30,10 @@ public class FileService {
     }
 
     /**
-     * Create a temporary file on the application's local filesystem. Callers should delete this file when
-     * it is no longer required.
+     * Create a temporary file on the application's local filesystem. Callers should delete this file when it is no longer required.
      *
-     * @param suffix to append to the temporary file name. Can be null.
-     * @return a file
+     * @param  suffix      to append to the temporary file name. Can be null.
+     * @return             a file
      * @throws IOException if the file could not be created
      */
     public File createTemporaryFile(String suffix) throws IOException {
@@ -46,9 +45,9 @@ public class FileService {
     /**
      * Streaming upload of a named file to the permanent file store. File length is derived from reading the input stream.
      *
-     * @param originalFilename to record for the file
-     * @param inputStream      to read from. Must be closed by the caller.
-     * @return UUID assigned to this file.
+     * @param  originalFilename to record for the file
+     * @param  inputStream      to read from. Must be closed by the caller.
+     * @return                  UUID assigned to this file.
      */
     public UUID transferToPermanentStore(String originalFilename, InputStream inputStream) throws IOException {
         return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, inputStream).getPersistedFileIdentifier().getFileId();
@@ -57,20 +56,21 @@ public class FileService {
     /**
      * Streaming upload of a named file to the permanent file store. File length is provided by the caller.
      *
-     * @param originalFilename to record for the file
-     * @param inputStream      to read from. Must be closed by the caller.
-     * @return UUID assigned to this file.
+     * @param  originalFilename to record for the file
+     * @param  inputStream      to read from. Must be closed by the caller.
+     * @return                  UUID assigned to this file.
      */
     public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
-        return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier().getFileId();
+        return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier()
+            .getFileId();
     }
 
     /**
      * Streaming upload of a named file to the ephemeral file store. File length is derived from reading the input stream.
      *
-     * @param filename    to record for the file
-     * @param inputStream to read from. Must be closed by the caller.
-     * @return UUID assigned to this file.
+     * @param  filename    to record for the file
+     * @param  inputStream to read from. Must be closed by the caller.
+     * @return             UUID assigned to this file.
      */
     public UUID transferToEphemeralStore(String filename, InputStream inputStream) throws IOException {
         return ephemeralDeduplicatingFileStore.uploadAsStream(filename, inputStream).getPersistedFileIdentifier().getFileId();
@@ -79,8 +79,8 @@ public class FileService {
     /**
      * Streaming upload of an unnamed file to the ephemeral file store. File length is derived from reading the input stream.
      *
-     * @param inputStream to read from. Must be closed by the caller.
-     * @return UUID assigned to this file.
+     * @param  inputStream to read from. Must be closed by the caller.
+     * @return             UUID assigned to this file.
      */
     public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
         return transferToEphemeralStore("", inputStream);
@@ -89,22 +89,22 @@ public class FileService {
     /**
      * Streaming download of file.
      *
-     * @param fileId is the UUID originally assigned to the file.
-     * @return input stream of known length
+     * @param  fileId      is the UUID originally assigned to the file.
+     * @return             input stream of known length
      * @throws IOException if the file cannot be read
      */
     public InputStreamOfKnownLength stream(UUID fileId) throws IOException {
         PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT)
-                ? permanentDeduplicatingFileStore
-                : ephemeralDeduplicatingFileStore;
+            ? permanentDeduplicatingFileStore
+            : ephemeralDeduplicatingFileStore;
         return fileStore.downloadAsStream(persistableFileMapping);
     }
 
     /**
      * Marking ephemeral files for deletion
      *
-     * @param persistedFileIdentifiers to mark for deletion
+     * @param  persistedFileIdentifiers to mark for deletion
      * @throws IllegalArgumentException if the file is not ephemeral
      */
     public void markFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
@@ -114,7 +114,7 @@ public class FileService {
     /**
      * Mark an ephemeral file for deletion
      *
-     * @param persistedFileIdentifier to mark for deletion
+     * @param  persistedFileIdentifier  to mark for deletion
      * @throws IllegalArgumentException if the file is not ephemeral
      */
     public void markFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {

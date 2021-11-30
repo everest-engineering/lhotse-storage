@@ -25,9 +25,9 @@ public class AwsS3FileStoreConfig {
         }
 
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(customEndpoint, regionFor(customEndpoint)))
-                .withCredentials(awsCredentialsProvider)
-                .build();
+            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(customEndpoint, regionFor(customEndpoint)))
+            .withCredentials(awsCredentialsProvider)
+            .build();
     }
 
     @Bean

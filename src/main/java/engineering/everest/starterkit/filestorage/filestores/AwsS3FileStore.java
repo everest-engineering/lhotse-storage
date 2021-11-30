@@ -70,8 +70,8 @@ public class AwsS3FileStore implements FileStore {
             return new KeyVersion(s3URI.getKey(), s3URI.getVersionId());
         }).collect(toList());
         DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
-                .withKeys(keyVersions)
-                .withQuiet(false);
+            .withKeys(keyVersions)
+            .withQuiet(false);
         amazonS3.deleteObjects(multiObjectDeleteRequest);
     }
 

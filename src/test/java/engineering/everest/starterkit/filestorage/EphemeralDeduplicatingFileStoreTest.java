@@ -36,7 +36,8 @@ class EphemeralDeduplicatingFileStoreTest {
 
     private static final String EXISTING_NATIVE_STORE_FILE_ID = "existing-native-store-file-id";
     private static final String SHA_256 = "108e0047119fdf8db72dc146283d0cd717d620a9b4fb9ead902e22f4c04fbe7b";
-    private static final String SHA_512 = "cb61c18674f50eedd4f7d77f938b11d468713516b14862c4ae4ea68ec5aa30c1475d7d38f17e14585da10ea848a054733f2185b1ea57f10a1c416bb1617baa60";
+    private static final String SHA_512 =
+        "cb61c18674f50eedd4f7d77f938b11d468713516b14862c4ae4ea68ec5aa30c1475d7d38f17e14585da10ea848a054733f2185b1ea57f10a1c416bb1617baa60";
     private static final String TEMPORARY_FILE_CONTENTS = "A temporary file for unit testing";
     private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
     private static final UUID FILE_ID = randomUUID();
@@ -58,14 +59,16 @@ class EphemeralDeduplicatingFileStoreTest {
     void markFileForDeletion_WillMarkFileForDeletionInFileMappingRepository() {
         UUID uuid = randomUUID();
         UUID uuid2 = randomUUID();
-        when(fileMappingRepository.findById(uuid)).thenReturn(of(new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
+        when(fileMappingRepository.findById(uuid)).thenReturn(of(new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
         var persistedFileIdentifier = new PersistedFileIdentifier(uuid, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
         ephemeralDeduplicatingFileStore.markFileForDeletion(persistedFileIdentifier);
 
         verifyNoInteractions(fileStore);
-        verify(fileMappingRepository).save(new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true));
+        verify(fileMappingRepository).save(
+            new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true));
     }
 
     @Test
@@ -84,27 +87,30 @@ class EphemeralDeduplicatingFileStoreTest {
     @Test
     void markFilesForDeletion_WillMarkFilesForDeletionInFileMappingRepository() {
         UUID fileId = randomUUID();
-        when(fileMappingRepository.findById(fileId)).thenReturn(of(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
+        when(fileMappingRepository.findById(fileId)).thenReturn(of(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
         ephemeralDeduplicatingFileStore.markFilesForDeletion(Set.of(persistedFileIdentifier));
 
         verifyNoInteractions(fileStore);
-        verify(fileMappingRepository).save(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true));
+        verify(fileMappingRepository).save(
+            new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true));
     }
 
     @Test
     void markFilesForDeletion_WillFail_WhenFileIsNotEphemeral() {
         var persistedFileIdentifier = new PersistedFileIdentifier(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID);
 
-        assertThrows(IllegalArgumentException.class, () ->
-                ephemeralDeduplicatingFileStore.markFilesForDeletion(Set.of(persistedFileIdentifier)));
+        assertThrows(IllegalArgumentException.class,
+            () -> ephemeralDeduplicatingFileStore.markFilesForDeletion(Set.of(persistedFileIdentifier)));
     }
 
     @Test
     void markAllFilesForDeletion_WillMarkAllFilesInFileMappingRepositoryForDeletion() {
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
         when(fileMappingRepository.findAll()).thenReturn(List.of(persistableFileMapping));
 
         ephemeralDeduplicatingFileStore.markAllFilesForDeletion();
@@ -115,7 +121,8 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void deleteFileBatch_WillDeleteFilesFromFileStoreAndFromFileMappingRepository() {
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
         when(fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, BATCH_SIZE))).thenReturn(List.of(persistableFileMapping));
 
         ephemeralDeduplicatingFileStore.deleteFileBatch(BATCH_SIZE);
@@ -126,7 +133,8 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void downloadAsStream_WillReturnExceptionIfFileAlreadyMarkedForDeletion() {
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), EPHEMERAL, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
 
         assertThrows(NoSuchElementException.class, () -> ephemeralDeduplicatingFileStore.downloadAsStream(persistableFileMapping));
     }
@@ -136,7 +144,8 @@ class EphemeralDeduplicatingFileStoreTest {
         InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
         when(fileStore.downloadAsStream(EXISTING_NATIVE_STORE_FILE_ID)).thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
 
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS,
+            EXISTING_NATIVE_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
         InputStreamOfKnownLength inputStreamOfKnownLength = ephemeralDeduplicatingFileStore.downloadAsStream(persistableFileMapping);
 
         assertEquals(inputStreamOfKnownLength.getLength(), FILE_SIZE);

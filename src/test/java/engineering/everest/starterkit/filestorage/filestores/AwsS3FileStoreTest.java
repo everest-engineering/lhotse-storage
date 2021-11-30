@@ -61,7 +61,7 @@ class AwsS3FileStoreTest {
 
         assertEquals(String.format("s3://bucket/fileName-%s", randomUUIDPart), fileIdentifier);
         verify(amazonS3).putObject(eq("bucket"), eq(String.format("fileName-%s", randomUUIDPart)),
-                eq(mockInputStream), any(ObjectMetadata.class));
+            eq(mockInputStream), any(ObjectMetadata.class));
     }
 
     @Test
@@ -106,8 +106,8 @@ class AwsS3FileStoreTest {
 
         ArgumentCaptor<DeleteObjectsRequest> captor = ArgumentCaptor.forClass(DeleteObjectsRequest.class);
         new DeleteObjectsRequest("bucket")
-                .withKeys(asList(new DeleteObjectsRequest.KeyVersion("fileName", "L4kqtJlcpXroDTDmpUMLUo")))
-                .withQuiet(false);
+            .withKeys(asList(new DeleteObjectsRequest.KeyVersion("fileName", "L4kqtJlcpXroDTDmpUMLUo")))
+            .withQuiet(false);
         verify(amazonS3).deleteObjects(captor.capture());
 
         DeleteObjectsRequest value = captor.getValue();

@@ -15,8 +15,7 @@ import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT
 import static java.util.UUID.randomUUID;
 
 /**
- * File store that removes duplicate copies of files and manages the mapping of individual file uploads
- * to a single backing file.
+ * File store that removes duplicate copies of files and manages the mapping of individual file uploads to a single backing file.
  * <p>
  * This default implementation does not support file deletion. It is intended to be used as a permanent file store.
  *
@@ -44,12 +43,12 @@ public class PermanentDeduplicatingFileStore {
     /**
      * Stream a file of unknown length to the file store, recording its name.
      * <p>
-     * <b>If possible, prefer to call the overloaded method that includes the length of the file. Depending
-     * on the backing file store implementation, this method may introduce performance overheads.</b>
+     * <b>If possible, prefer to call the overloaded method that includes the length of the file. Depending on the backing file store
+     * implementation, this method may introduce performance overheads.</b>
      *
-     * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
-     * @param inputStream      containing content to upload. Managed by the caller.
-     * @return persisted file information
+     * @param  originalFilename to record. Typically the original filename a user would associate with the file contents.
+     * @param  inputStream      containing content to upload. Managed by the caller.
+     * @return                  persisted file information
      */
     public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
         try (var countingInputStream = new CountingInputStream(inputStream);
@@ -58,7 +57,7 @@ public class PermanentDeduplicatingFileStore {
             var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename);
 
             return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
-                    sha512ingInputStream.hash().toString(), fileIdentifier, countingInputStream.getCount());
+                sha512ingInputStream.hash().toString(), fileIdentifier, countingInputStream.getCount());
         }
     }
 
@@ -67,10 +66,10 @@ public class PermanentDeduplicatingFileStore {
      * <p>
      * Callers are responsible for closing the input stream.
      *
-     * @param originalFilename to record. Typically the original filename a user would associate with the file contents.
-     * @param fileSize         in bytes
-     * @param inputStream      containing content to upload. Managed by the caller.
-     * @return persisted file information
+     * @param  originalFilename to record. Typically the original filename a user would associate with the file contents.
+     * @param  fileSize         in bytes
+     * @param  inputStream      containing content to upload. Managed by the caller.
+     * @return                  persisted file information
      */
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
@@ -78,7 +77,7 @@ public class PermanentDeduplicatingFileStore {
             var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename, fileSize);
 
             return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
-                    sha512ingInputStream.hash().toString(), fileIdentifier, fileSize);
+                sha512ingInputStream.hash().toString(), fileIdentifier, fileSize);
         }
     }
 
@@ -87,9 +86,9 @@ public class PermanentDeduplicatingFileStore {
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
-     * @param persistableFileMapping returned when a file was uploaded to the file store
-     * @return an input stream of known length
-     * @throws IOException if the file doesn't exist or could not be read
+     * @param  persistableFileMapping returned when a file was uploaded to the file store
+     * @return                        an input stream of known length
+     * @throws IOException            if the file doesn't exist or could not be read
      */
     public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
         PersistedFileIdentifier persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
@@ -98,23 +97,27 @@ public class PermanentDeduplicatingFileStore {
 
     private PersistedFile persistDeduplicateAndUpdateFileMapping(String sha256,
                                                                  String sha512,
-                                                                 String fileIdentifier, long fileSizeBytes) {
+                                                                 String fileIdentifier,
+                                                                 long fileSizeBytes) {
         var persistedFile = deduplicateUploadedFile(fileIdentifier, sha256, sha512, fileSizeBytes, fileStore.nativeStorageType());
         addFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
         return persistedFile;
     }
 
-    private PersistedFile deduplicateUploadedFile(String fileIdentifier, String uploadSha256, String uploadSha512,
-                                                  long fileSizeBytes, NativeStorageType nativeStorageType) {
+    private PersistedFile deduplicateUploadedFile(String fileIdentifier,
+                                                  String uploadSha256,
+                                                  String uploadSha512,
+                                                  long fileSizeBytes,
+                                                  NativeStorageType nativeStorageType) {
         Optional<PersistableFileMapping> existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
 
         if (existingFileMapping.isPresent()) {
             deletePersistedFile(fileIdentifier);
             return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, existingFileMapping.get().getNativeStorageFileId(),
-                    uploadSha256, uploadSha512, fileSizeBytes);
+                uploadSha256, uploadSha512, fileSizeBytes);
         } else {
             return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, fileIdentifier, uploadSha256, uploadSha512,
-                    fileSizeBytes);
+                fileSizeBytes);
         }
     }
 
@@ -124,12 +127,14 @@ public class PermanentDeduplicatingFileStore {
         fileMappingExample.setSha512(uploadSha512);
         fileMappingExample.setMarkedForDeletion(false);
         var matchingFiles = fileMappingRepository.findAll(Example.of(fileMappingExample));
-        return matchingFiles.isEmpty() ? Optional.empty() : Optional.of(matchingFiles.get(0));
+        return matchingFiles.isEmpty()
+            ? Optional.empty()
+            : Optional.of(matchingFiles.get(0));
     }
 
     private void addFileMapping(PersistedFile persistedFile, long fileSizeBytes, NativeStorageType nativeStorageType) {
         fileMappingRepository.save(new PersistableFileMapping(persistedFile.getFileId(), fileStoreType, nativeStorageType,
-                persistedFile.getNativeStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes, false));
+            persistedFile.getNativeStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes, false));
     }
 
     private void deletePersistedFile(String fileIdentifier) {
