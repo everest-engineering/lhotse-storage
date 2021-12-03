@@ -1,8 +1,8 @@
-package engineering.everest.starterkit.filestorage.filestores;
+package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.NativeStorageType;
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,16 +13,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.NativeStorageType.IN_MEMORY;
+import static engineering.everest.starterkit.filestorage.BackingStorageType.IN_MEMORY;
 import static java.util.UUID.randomUUID;
 
 /**
  * An filestore suitable for development. Not recommended for use in production.
  */
-public class InMemoryFileStore implements FileStore {
+public class InMemoryBackingStore implements BackingStore {
     private final Map<String, Metadata> fileMapping;
 
-    public InMemoryFileStore() {
+    public InMemoryBackingStore() {
         this.fileMapping = new HashMap<>();
     }
 
@@ -73,7 +73,7 @@ public class InMemoryFileStore implements FileStore {
     }
 
     @Override
-    public NativeStorageType nativeStorageType() {
+    public BackingStorageType backingStorageType() {
         return IN_MEMORY;
     }
 

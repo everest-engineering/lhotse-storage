@@ -25,8 +25,8 @@ import static org.springframework.data.domain.PageRequest.of;
 public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileStore {
 
     public EphemeralDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
-                                           FileStore fileStore) {
-        super(EPHEMERAL, fileMappingRepository, fileStore);
+                                           BackingStore backingStore) {
+        super(EPHEMERAL, fileMappingRepository, backingStore);
     }
 
     @Override
@@ -57,11 +57,11 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
     public void deleteFileBatch(int batchSize) {
         Pageable pageable = of(0, batchSize);
         Set<String> filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
-            .map(PersistableFileMapping::getNativeStorageFileId)
+            .map(PersistableFileMapping::getBackingStorageFileId)
             .collect(toSet());
 
-        fileStore.deleteFiles(filesInBatch);
-        fileMappingRepository.deleteAllByNativeStorageFileIdIn(filesInBatch);
+        backingStore.deleteFiles(filesInBatch);
+        fileMappingRepository.deleteAllByBackingStorageFileIdIn(filesInBatch);
     }
 
     private void markPersistedFileForDeletion(PersistableFileMapping persistableFileMapping) {

@@ -1,27 +1,27 @@
-package engineering.everest.starterkit.filestorage.filestores;
+package engineering.everest.starterkit.filestorage.backing;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.NativeStorageType;
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 
 import java.io.InputStream;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.NativeStorageType.AWS_S3;
+import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
-public class AwsS3FileStore implements FileStore {
+public class AwsS3BackingStore implements BackingStore {
 
     private final AmazonS3 amazonS3;
     private final String bucketName;
 
-    public AwsS3FileStore(AmazonS3 amazonS3, String bucketName) {
+    public AwsS3BackingStore(AmazonS3 amazonS3, String bucketName) {
         this.amazonS3 = amazonS3;
         this.bucketName = bucketName;
     }
@@ -57,7 +57,7 @@ public class AwsS3FileStore implements FileStore {
     }
 
     @Override
-    public NativeStorageType nativeStorageType() {
+    public BackingStorageType backingStorageType() {
         return AWS_S3;
     }
 

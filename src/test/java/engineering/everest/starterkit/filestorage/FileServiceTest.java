@@ -19,7 +19,7 @@ import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
-import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
+import static engineering.everest.starterkit.filestorage.BackingStorageType.MONGO_GRID_FS;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

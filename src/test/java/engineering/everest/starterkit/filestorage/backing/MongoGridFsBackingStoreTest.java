@@ -1,6 +1,6 @@
-package engineering.everest.starterkit.filestorage.filestores;
+package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.NativeStorageType;
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +21,16 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 @ExtendWith(MockitoExtension.class)
-class MongoGridFsFileStoreTest {
+class MongoGridFsBackingStoreTest {
 
-    private MongoGridFsFileStore fileStore;
+    private MongoGridFsBackingStore fileStore;
 
     @Mock
     private GridFsTemplate gridFsTemplate;
 
     @BeforeEach
     public void setUp() {
-        this.fileStore = new MongoGridFsFileStore(gridFsTemplate);
+        this.fileStore = new MongoGridFsBackingStore(gridFsTemplate);
     }
 
     @Test
@@ -67,8 +67,8 @@ class MongoGridFsFileStoreTest {
     }
 
     @Test
-    public void nativeStorageTypeIsMongoGridFs() {
-        assertEquals(this.fileStore.nativeStorageType(), NativeStorageType.MONGO_GRID_FS);
+    public void backingStorageTypeIsMongoGridFs() {
+        assertEquals(this.fileStore.backingStorageType(), BackingStorageType.MONGO_GRID_FS);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package engineering.everest.starterkit.filestorage.config;
 
-import engineering.everest.starterkit.filestorage.FileStore;
-import engineering.everest.starterkit.filestorage.filestores.InMemoryFileStore;
+import engineering.everest.starterkit.filestorage.BackingStore;
+import engineering.everest.starterkit.filestorage.backing.InMemoryBackingStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -9,17 +9,17 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnProperty(name = "application.filestore.backend", havingValue = "inMemory")
-public class InMemoryFileStoreConfig {
+public class InMemoryBackingStoreConfig {
 
     @Bean
-    @Qualifier("permanentFileStore")
-    FileStore mongoGridFsPermanentFileStoreTemplate() {
-        return new InMemoryFileStore();
+    @Qualifier("permanentBackingStore")
+    BackingStore inMemoryPermanentBackingStore() {
+        return new InMemoryBackingStore();
     }
 
     @Bean
-    @Qualifier("ephemeralFileStore")
-    FileStore mongoGridFsEphemeralFileStoreTemplate() {
-        return new InMemoryFileStore();
+    @Qualifier("ephemeralBackingStore")
+    BackingStore inMemoryEphemeralBackingStore() {
+        return new InMemoryBackingStore();
     }
 }

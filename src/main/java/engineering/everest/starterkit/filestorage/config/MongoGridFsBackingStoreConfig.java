@@ -1,7 +1,7 @@
 package engineering.everest.starterkit.filestorage.config;
 
-import engineering.everest.starterkit.filestorage.FileStore;
-import engineering.everest.starterkit.filestorage.filestores.MongoGridFsFileStore;
+import engineering.everest.starterkit.filestorage.BackingStore;
+import engineering.everest.starterkit.filestorage.backing.MongoGridFsBackingStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -12,19 +12,19 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 @Configuration
 @ConditionalOnProperty(name = "application.filestore.backend", havingValue = "mongoGridFs")
-public class MongoGridFsFileStoreConfig {
+public class MongoGridFsBackingStoreConfig {
 
     @Bean
-    @Qualifier("permanentFileStore")
-    FileStore mongoGridFsPermanentFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
+    @Qualifier("permanentBackingStore")
+    BackingStore mongoGridFsPermanentFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
         GridFsTemplate gridFsTemplate = new GridFsTemplate(dbFactory, mongoConverter, "fs.permanent");
-        return new MongoGridFsFileStore(gridFsTemplate);
+        return new MongoGridFsBackingStore(gridFsTemplate);
     }
 
     @Bean
-    @Qualifier("ephemeralFileStore")
-    FileStore mongoGridFsEphemeralFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
+    @Qualifier("ephemeralBackingStore")
+    BackingStore mongoGridFsEphemeralFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
         GridFsTemplate gridFsTemplate = new GridFsTemplate(dbFactory, mongoConverter, "fs.ephemeral");
-        return new MongoGridFsFileStore(gridFsTemplate);
+        return new MongoGridFsBackingStore(gridFsTemplate);
     }
 }

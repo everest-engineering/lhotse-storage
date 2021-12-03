@@ -1,17 +1,20 @@
 package engineering.everest.starterkit.filestorage;
 
+import engineering.everest.starterkit.filestorage.backing.AwsS3BackingStore;
+import engineering.everest.starterkit.filestorage.backing.MongoGridFsBackingStore;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
 /**
- * Interface for the low level file store implementations.
+ * Interface for the backing file store implementations.
  *
  * @see FileService
- * @see engineering.everest.starterkit.filestorage.filestores.AwsS3FileStore
- * @see engineering.everest.starterkit.filestorage.filestores.MongoGridFsFileStore
+ * @see AwsS3BackingStore
+ * @see MongoGridFsBackingStore
  */
-public interface FileStore {
+public interface BackingStore {
 
     /**
      * Stream a file of unknown length to the file store, recording its name.
@@ -65,7 +68,7 @@ public interface FileStore {
     InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException;
 
     /**
-     * @return the native storage type of the filestore
+     * @return the backing storage type of the filestore
      */
-    NativeStorageType nativeStorageType();
+    BackingStorageType backingStorageType();
 }

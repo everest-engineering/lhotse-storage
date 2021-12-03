@@ -14,6 +14,6 @@ public class PersistedFileIdentifier implements Serializable {
 
     private UUID fileId;
     private FileStoreType fileStoreType;
-    private NativeStorageType storageType;
-    private String nativeStorageFileId;
+    private BackingStorageType storageType;
+    private String backingStorageFileId;
 }

@@ -25,19 +25,19 @@ public class PermanentDeduplicatingFileStore {
 
     protected final FileStoreType fileStoreType;
     protected final FileMappingRepository fileMappingRepository;
-    protected final FileStore fileStore;
+    protected final BackingStore backingStore;
 
     public PermanentDeduplicatingFileStore(FileMappingRepository fileMappingRepository,
-                                           FileStore fileStore) {
-        this(PERMANENT, fileMappingRepository, fileStore);
+                                           BackingStore backingStore) {
+        this(PERMANENT, fileMappingRepository, backingStore);
     }
 
     protected PermanentDeduplicatingFileStore(FileStoreType fileStoreType,
                                               FileMappingRepository fileMappingRepository,
-                                              FileStore fileStore) {
+                                              BackingStore backingStore) {
         this.fileStoreType = fileStoreType;
         this.fileMappingRepository = fileMappingRepository;
-        this.fileStore = fileStore;
+        this.backingStore = backingStore;
     }
 
     /**
@@ -54,7 +54,7 @@ public class PermanentDeduplicatingFileStore {
         try (var countingInputStream = new CountingInputStream(inputStream);
              var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), countingInputStream);
              var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
-            var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename);
+            var fileIdentifier = backingStore.uploadStream(sha512ingInputStream, originalFilename);
 
             return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
                 sha512ingInputStream.hash().toString(), fileIdentifier, countingInputStream.getCount());
@@ -74,7 +74,7 @@ public class PermanentDeduplicatingFileStore {
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
              var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
-            var fileIdentifier = fileStore.uploadStream(sha512ingInputStream, originalFilename, fileSize);
+            var fileIdentifier = backingStore.uploadStream(sha512ingInputStream, originalFilename, fileSize);
 
             return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
                 sha512ingInputStream.hash().toString(), fileIdentifier, fileSize);
@@ -92,15 +92,15 @@ public class PermanentDeduplicatingFileStore {
      */
     public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
         PersistedFileIdentifier persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
-        return fileStore.downloadAsStream(persistedFileIdentifier.getNativeStorageFileId());
+        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId());
     }
 
     private PersistedFile persistDeduplicateAndUpdateFileMapping(String sha256,
                                                                  String sha512,
                                                                  String fileIdentifier,
                                                                  long fileSizeBytes) {
-        var persistedFile = deduplicateUploadedFile(fileIdentifier, sha256, sha512, fileSizeBytes, fileStore.nativeStorageType());
-        addFileMapping(persistedFile, fileSizeBytes, fileStore.nativeStorageType());
+        var persistedFile = deduplicateUploadedFile(fileIdentifier, sha256, sha512, fileSizeBytes, backingStore.backingStorageType());
+        addFileMapping(persistedFile, fileSizeBytes, backingStore.backingStorageType());
         return persistedFile;
     }
 
@@ -108,15 +108,15 @@ public class PermanentDeduplicatingFileStore {
                                                   String uploadSha256,
                                                   String uploadSha512,
                                                   long fileSizeBytes,
-                                                  NativeStorageType nativeStorageType) {
+                                                  BackingStorageType backingStorageType) {
         Optional<PersistableFileMapping> existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
 
         if (existingFileMapping.isPresent()) {
             deletePersistedFile(fileIdentifier);
-            return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, existingFileMapping.get().getNativeStorageFileId(),
+            return new PersistedFile(randomUUID(), fileStoreType, backingStorageType, existingFileMapping.get().getBackingStorageFileId(),
                 uploadSha256, uploadSha512, fileSizeBytes);
         } else {
-            return new PersistedFile(randomUUID(), fileStoreType, nativeStorageType, fileIdentifier, uploadSha256, uploadSha512,
+            return new PersistedFile(randomUUID(), fileStoreType, backingStorageType, fileIdentifier, uploadSha256, uploadSha512,
                 fileSizeBytes);
         }
     }
@@ -132,12 +132,12 @@ public class PermanentDeduplicatingFileStore {
             : Optional.of(matchingFiles.get(0));
     }
 
-    private void addFileMapping(PersistedFile persistedFile, long fileSizeBytes, NativeStorageType nativeStorageType) {
-        fileMappingRepository.save(new PersistableFileMapping(persistedFile.getFileId(), fileStoreType, nativeStorageType,
-            persistedFile.getNativeStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes, false));
+    private void addFileMapping(PersistedFile persistedFile, long fileSizeBytes, BackingStorageType backingStorageType) {
+        fileMappingRepository.save(new PersistableFileMapping(persistedFile.getFileId(), fileStoreType, backingStorageType,
+            persistedFile.getBackingStorageFileId(), persistedFile.getSha256(), persistedFile.getSha512(), fileSizeBytes, false));
     }
 
     private void deletePersistedFile(String fileIdentifier) {
-        fileStore.delete(fileIdentifier);
+        backingStore.delete(fileIdentifier);
     }
 }

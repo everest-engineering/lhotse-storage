@@ -1,4 +1,4 @@
-package engineering.everest.starterkit.filestorage.filestores;
+package engineering.everest.starterkit.filestorage.backing;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static engineering.everest.starterkit.filestorage.NativeStorageType.AWS_S3;
+import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
 import static java.util.Arrays.asList;
 import static java.util.Set.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,16 +29,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AwsS3FileStoreTestMetadata {
+class AwsS3BackingStoreTestMetadata {
 
-    private AwsS3FileStore fileStore;
+    private AwsS3BackingStore fileStore;
 
     @Mock
     private AmazonS3 amazonS3;
 
     @BeforeEach
     public void setUp() {
-        this.fileStore = new AwsS3FileStore(amazonS3, "bucket");
+        this.fileStore = new AwsS3BackingStore(amazonS3, "bucket");
     }
 
     @Test
@@ -94,8 +94,8 @@ class AwsS3FileStoreTestMetadata {
     }
 
     @Test
-    public void nativeStorageTypeIsAwsS3() {
-        assertEquals(AWS_S3, fileStore.nativeStorageType());
+    public void backingStorageTypeIsAwsS3() {
+        assertEquals(AWS_S3, fileStore.backingStorageType());
     }
 
     @Test

@@ -1,8 +1,8 @@
-package engineering.everest.starterkit.filestorage.filestores;
+package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.FileStore;
+import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.NativeStorageType;
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
@@ -11,15 +11,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.NativeStorageType.MONGO_GRID_FS;
+import static engineering.everest.starterkit.filestorage.BackingStorageType.MONGO_GRID_FS;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
-public class MongoGridFsFileStore implements FileStore {
+public class MongoGridFsBackingStore implements BackingStore {
 
     private final GridFsTemplate gridFs;
 
-    public MongoGridFsFileStore(GridFsTemplate gridFs) {
+    public MongoGridFsBackingStore(GridFsTemplate gridFs) {
         this.gridFs = gridFs;
     }
 
@@ -50,7 +50,7 @@ public class MongoGridFsFileStore implements FileStore {
     }
 
     @Override
-    public NativeStorageType nativeStorageType() {
+    public BackingStorageType backingStorageType() {
         return MONGO_GRID_FS;
     }
 
