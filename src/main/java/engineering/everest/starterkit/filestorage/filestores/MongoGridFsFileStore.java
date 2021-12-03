@@ -25,13 +25,13 @@ public class MongoGridFsFileStore implements FileStore {
 
     @Override
     public String uploadStream(InputStream inputStream, String fileName) {
-        ObjectId mongoObjectId = gridFs.store(inputStream, fileName);
+        var mongoObjectId = gridFs.store(inputStream, fileName);
         return mongoObjectId.toHexString();
     }
 
     @Override
     public String uploadStream(InputStream inputStream, String fileName, long ignored) {
-        ObjectId mongoObjectId = gridFs.store(inputStream, fileName);
+        var mongoObjectId = gridFs.store(inputStream, fileName);
         return mongoObjectId.toHexString();
     }
 

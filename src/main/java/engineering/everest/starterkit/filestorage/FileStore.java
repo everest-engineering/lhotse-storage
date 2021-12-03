@@ -47,6 +47,13 @@ public interface FileStore {
     void delete(String fileIdentifier);
 
     /**
+     * Delete a set of files
+     *
+     * @param fileIdentifiers of the files to delete
+     */
+    void deleteFiles(Set<String> fileIdentifiers);
+
+    /**
      * Streaming download.
      * <p>
      * Callers are responsible for closing the returned input stream.
@@ -61,11 +68,4 @@ public interface FileStore {
      * @return the native storage type of the filestore
      */
     NativeStorageType nativeStorageType();
-
-    /**
-     * Delete a set of files
-     *
-     * @param fileIdentifiers of the files to delete
-     */
-    void deleteFiles(Set<String> fileIdentifiers);
 }

@@ -16,18 +16,15 @@ public class MongoGridFsFileStoreConfig {
 
     @Bean
     @Qualifier("permanentFileStore")
-    FileStore mongoGridFsPermanentFileStoreTemplate(MongoConverter mongoConverter,
-                                                    MongoDatabaseFactory dbFactory) {
+    FileStore mongoGridFsPermanentFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
         GridFsTemplate gridFsTemplate = new GridFsTemplate(dbFactory, mongoConverter, "fs.permanent");
         return new MongoGridFsFileStore(gridFsTemplate);
     }
 
     @Bean
     @Qualifier("ephemeralFileStore")
-    FileStore mongoGridFsEphemeralFileStoreTemplate(MongoConverter mongoConverter,
-                                                    MongoDatabaseFactory dbFactory) {
+    FileStore mongoGridFsEphemeralFileStoreTemplate(MongoConverter mongoConverter, MongoDatabaseFactory dbFactory) {
         GridFsTemplate gridFsTemplate = new GridFsTemplate(dbFactory, mongoConverter, "fs.ephemeral");
         return new MongoGridFsFileStore(gridFsTemplate);
     }
-
 }
