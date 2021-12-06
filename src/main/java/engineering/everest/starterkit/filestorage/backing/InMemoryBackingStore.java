@@ -34,7 +34,7 @@ public class InMemoryBackingStore implements BackingStore {
             fileMapping.put(id, new Metadata(contents.length, contents));
             return id;
         } catch (IOException e) {
-            throw new RuntimeException("Unable to upload file " + fileName);
+            throw new BackingFileStoreException("Unable to upload file " + fileName, e);
         }
     }
 
@@ -48,7 +48,7 @@ public class InMemoryBackingStore implements BackingStore {
             fileMapping.put(id, new Metadata(fileSize, contents));
             return id;
         } catch (IOException e) {
-            throw new RuntimeException("Unable to upload file " + fileName);
+            throw new BackingFileStoreException("Unable to upload file " + fileName, e);
         }
     }
 
@@ -79,13 +79,13 @@ public class InMemoryBackingStore implements BackingStore {
 
     private void throwIfFileNotInFilestore(String fileIdentifier) {
         if (!fileMapping.containsKey(fileIdentifier)) {
-            throw new RuntimeException(String.format("File '%s' not in filestore", fileIdentifier));
+            throw new BackingFileStoreException(String.format("File '%s' not in filestore", fileIdentifier));
         }
     }
 
     private void throwIfContentLengthNotExpectedFileSize(String fileName, long fileSize, byte[] contents) {
         if (fileSize != contents.length) {
-            throw new RuntimeException(
+            throw new BackingFileStoreException(
                 String.format("Expected file size %d for uploaded file '%s' but content length is %d", fileSize, fileName,
                     contents.length));
         }

@@ -141,7 +141,7 @@ class EphemeralDeduplicatingFileStoreTest {
     }
 
     @Test
-    public void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
+    void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
         when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
             .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));

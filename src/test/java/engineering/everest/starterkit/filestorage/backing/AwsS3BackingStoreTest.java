@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AwsS3BackingStoreTestMetadata {
+class AwsS3BackingStoreTest {
 
     private AwsS3BackingStore fileStore;
 
@@ -37,12 +37,12 @@ class AwsS3BackingStoreTestMetadata {
     private AmazonS3 amazonS3;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.fileStore = new AwsS3BackingStore(amazonS3, "bucket");
     }
 
     @Test
-    public void uploadStream_WillCreateUniquelyNamedS3Object() {
+    void uploadStream_WillCreateUniquelyNamedS3Object() {
         var mockInputStream = mock(InputStream.class);
         var fileIdentifier = fileStore.uploadStream(mockInputStream, "fileName");
         // Would have been a clean test if the UUID wrapper hadn't been removed
@@ -53,7 +53,7 @@ class AwsS3BackingStoreTestMetadata {
     }
 
     @Test
-    public void uploadStreamWillFileSize_WillCreateUniquelyNamedS3Object() {
+    void uploadStreamWillFileSize_WillCreateUniquelyNamedS3Object() {
         var mockInputStream = mock(InputStream.class);
         var fileIdentifier = fileStore.uploadStream(mockInputStream, "fileName", 4543L);
         // Would have been a clean test if the UUID wrapper hadn't been removed
@@ -65,20 +65,20 @@ class AwsS3BackingStoreTestMetadata {
     }
 
     @Test
-    public void delete_WillDeleteFromTheS3Bucket() {
+    void delete_WillDeleteFromTheS3Bucket() {
         fileStore.delete("s3://bucket/fileName");
 
         verify(amazonS3).deleteObject("bucket", "fileName");
     }
 
     @Test
-    public void downloadAsStream_WillFailWhenTheObjectDoesNotExistInTheS3Bucket() {
-        var exception = assertThrows(RuntimeException.class, () -> fileStore.downloadAsStream("s3://bucket/fileName"));
+    void downloadAsStream_WillFailWhenTheObjectDoesNotExistInTheS3Bucket() {
+        var exception = assertThrows(BackingFileStoreException.class, () -> fileStore.downloadAsStream("s3://bucket/fileName"));
         assertEquals("Unable to retrieve file: s3://bucket/fileName", exception.getMessage());
     }
 
     @Test
-    public void downloadAsStream_WillFetchTheObjectFromS3Bucket() {
+    void downloadAsStream_WillFetchTheObjectFromS3Bucket() {
         var fileIdentifier = "s3://bucket/fileName";
         var mockS3Object = mock(S3Object.class);
         ObjectMetadata objectMetadata = mock(ObjectMetadata.class);
@@ -94,12 +94,12 @@ class AwsS3BackingStoreTestMetadata {
     }
 
     @Test
-    public void backingStorageTypeIsAwsS3() {
+    void backingStorageTypeIsAwsS3() {
         assertEquals(AWS_S3, fileStore.backingStorageType());
     }
 
     @Test
-    public void deleteFiles_WillDeleteFromTheS3Bucket() {
+    void deleteFiles_WillDeleteFromTheS3Bucket() {
         var fileIdentifiers = of("s3://bucket/fileName");
 
         fileStore.deleteFiles(fileIdentifiers);

@@ -1,8 +1,8 @@
 package engineering.everest.starterkit.filestorage.backing;
 
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.BackingStorageType;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
@@ -44,7 +44,7 @@ public class MongoGridFsBackingStore implements BackingStore {
     public InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException {
         var gridFSFile = gridFs.findOne(new Query(where("_id").is(fileIdentifier)));
         if (gridFSFile == null) {
-            throw new RuntimeException("Unable to retrieve file " + fileIdentifier);
+            throw new BackingFileStoreException(String.format("Unable to retrieve file %s", fileIdentifier));
         }
         return new InputStreamOfKnownLength(gridFs.getResource(gridFSFile).getInputStream(), gridFSFile.getLength());
     }

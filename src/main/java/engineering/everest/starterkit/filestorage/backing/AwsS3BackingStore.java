@@ -52,7 +52,7 @@ public class AwsS3BackingStore implements BackingStore {
             var s3Object = amazonS3.getObject(s3URI.getBucket(), s3URI.getKey());
             return new InputStreamOfKnownLength(s3Object.getObjectContent(), s3Object.getObjectMetadata().getInstanceLength());
         } else {
-            throw new RuntimeException(String.format("Unable to retrieve file: %s", fileIdentifier));
+            throw new BackingFileStoreException(String.format("Unable to retrieve file: %s", fileIdentifier));
         }
     }
 

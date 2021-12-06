@@ -29,12 +29,12 @@ class MongoGridFsBackingStoreTest {
     private GridFsTemplate gridFsTemplate;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.fileStore = new MongoGridFsBackingStore(gridFsTemplate);
     }
 
     @Test
-    public void uploadStream_WillStoreFileInGridFs() {
+    void uploadStream_WillStoreFileInGridFs() {
         var objectId = new ObjectId();
         var mockInputStream = mock(InputStream.class);
         when(gridFsTemplate.store(mockInputStream, "file")).thenReturn(objectId);
@@ -43,7 +43,7 @@ class MongoGridFsBackingStoreTest {
     }
 
     @Test
-    public void uploadStreamWithFileSize_WillStoreFileInGridFs() {
+    void uploadStreamWithFileSize_WillStoreFileInGridFs() {
         var objectId = new ObjectId();
         var mockInputStream = mock(InputStream.class);
         when(gridFsTemplate.store(mockInputStream, "file")).thenReturn(objectId);
@@ -52,7 +52,7 @@ class MongoGridFsBackingStoreTest {
     }
 
     @Test
-    public void delete_WillRemoveFileFromGridFs() {
+    void delete_WillRemoveFileFromGridFs() {
         String fileIdentifier = "5e253b753496211048764352";
         fileStore.delete(fileIdentifier);
 
@@ -60,19 +60,19 @@ class MongoGridFsBackingStoreTest {
     }
 
     @Test
-    public void downloadAsStream_WillFailWhenFilesDoesNotExist() {
+    void downloadAsStream_WillFailWhenFilesDoesNotExist() {
         var exception = assertThrows(RuntimeException.class, () -> fileStore.downloadAsStream("5e253b753496211048764352"));
 
         assertEquals(exception.getMessage(), "Unable to retrieve file 5e253b753496211048764352");
     }
 
     @Test
-    public void backingStorageTypeIsMongoGridFs() {
+    void backingStorageTypeIsMongoGridFs() {
         assertEquals(this.fileStore.backingStorageType(), BackingStorageType.MONGO_GRID_FS);
     }
 
     @Test
-    public void deleteFiles_WillRemoveFilesFromGridFs() {
+    void deleteFiles_WillRemoveFilesFromGridFs() {
         var fileIdentifiers = of("5e253b753496211048764352", "5e253b753496211048764351");
         fileStore.deleteFiles(fileIdentifiers);
 
