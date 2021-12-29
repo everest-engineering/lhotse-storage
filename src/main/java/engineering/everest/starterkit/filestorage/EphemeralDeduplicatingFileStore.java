@@ -47,7 +47,7 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
     }
 
     public void markAllFilesForDeletion() {
-        var persistableFileMappings = fileMappingRepository.findAll();
+        var persistableFileMappings = fileMappingRepository.findByFileStoreType(EPHEMERAL);
         persistableFileMappings.forEach(persistableFileMapping -> persistableFileMapping.setMarkedForDeletion(true));
         fileMappingRepository.saveAll(persistableFileMappings);
     }

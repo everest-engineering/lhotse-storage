@@ -59,7 +59,6 @@ public class InMemoryBackingStore implements BackingStore {
 
     @Override
     public void deleteFiles(Set<String> fileIdentifiers) {
-        fileIdentifiers.forEach(this::throwIfFileNotInFilestore);
         fileIdentifiers.forEach(fileMapping::remove);
     }
 

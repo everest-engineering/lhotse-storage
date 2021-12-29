@@ -118,16 +118,10 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
-    void deleteFiles_WillFail_WhenAFileIsNotInStore() {
-        var exception = assertThrows(RuntimeException.class, () -> inMemoryBackingStore.deleteFiles(Set.of("garbage-id")));
-        assertEquals("File 'garbage-id' not in filestore", exception.getMessage());
-    }
-
-    @Test
-    void deleteFiles_WillNotDeleteAnyFiles_WhenAnyFileIsNotInStore() throws IOException {
+    void deleteFilesIsIdempotent() {
         var persistedFileId = inMemoryBackingStore.uploadStream(new ByteArrayInputStream(FILE_CONTENTS), FILENAME);
-
-        assertThrows(RuntimeException.class, () -> inMemoryBackingStore.deleteFiles(Set.of(persistedFileId, "garbage-id")));
-        assertNotNull(inMemoryBackingStore.downloadAsStream(persistedFileId));
+        inMemoryBackingStore.deleteFiles(Set.of(persistedFileId));
+        inMemoryBackingStore.deleteFiles(Set.of(persistedFileId));
+        assertThrows(RuntimeException.class, () -> inMemoryBackingStore.downloadAsStream(persistedFileId));
     }
 }

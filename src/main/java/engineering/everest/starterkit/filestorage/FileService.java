@@ -107,7 +107,7 @@ public class FileService {
      * @param  persistedFileIdentifiers to mark for deletion
      * @throws IllegalArgumentException if the file is not ephemeral
      */
-    public void markFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
+    public void markEphemeralFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
         ephemeralDeduplicatingFileStore.markFilesForDeletion(persistedFileIdentifiers);
     }
 
@@ -117,14 +117,14 @@ public class FileService {
      * @param  persistedFileIdentifier  to mark for deletion
      * @throws IllegalArgumentException if the file is not ephemeral
      */
-    public void markFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {
+    public void markEphemeralFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {
         ephemeralDeduplicatingFileStore.markFileForDeletion(persistedFileIdentifier);
     }
 
     /**
      * Marks all ephemeral files for deletion
      */
-    public void markAllFilesForDeletion() {
+    public void markAllEphemeralFilesForDeletion() {
         ephemeralDeduplicatingFileStore.markAllFilesForDeletion();
     }
 
@@ -133,7 +133,7 @@ public class FileService {
      *
      * @param batchSize is the number of files to delete
      */
-    public void deleteFileBatch(int batchSize) {
+    public void deleteEphemeralFileBatch(int batchSize) {
         ephemeralDeduplicatingFileStore.deleteFileBatch(batchSize);
     }
 }

@@ -112,7 +112,7 @@ class EphemeralDeduplicatingFileStoreTest {
     void markAllFilesForDeletion_WillMarkAllFilesInFileMappingRepositoryForDeletion() {
         PersistableFileMapping persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
-        when(fileMappingRepository.findAll()).thenReturn(List.of(persistableFileMapping));
+        when(fileMappingRepository.findByFileStoreType(EPHEMERAL)).thenReturn(List.of(persistableFileMapping));
 
         ephemeralDeduplicatingFileStore.markAllFilesForDeletion();
 

@@ -147,7 +147,7 @@ class FileServiceTest {
         UUID fileId = randomUUID();
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
 
-        fileService.markFileForDeletion(persistedFileIdentifier);
+        fileService.markEphemeralFileForDeletion(persistedFileIdentifier);
 
         verify(ephemeralFileStore).markFileForDeletion(persistedFileIdentifier);
     }
@@ -158,21 +158,21 @@ class FileServiceTest {
         PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
         Set<PersistedFileIdentifier> persistedFileIdentifier1 = Set.of(persistedFileIdentifier);
 
-        fileService.markFilesForDeletion(persistedFileIdentifier1);
+        fileService.markEphemeralFilesForDeletion(persistedFileIdentifier1);
 
         verify(ephemeralFileStore).markFilesForDeletion(persistedFileIdentifier1);
     }
 
     @Test
     void markAllFilesForDeletion_WillDelegateToEphemeralFileStore() {
-        fileService.markAllFilesForDeletion();
+        fileService.markAllEphemeralFilesForDeletion();
 
         verify(ephemeralFileStore).markAllFilesForDeletion();
     }
 
     @Test
     void deleteFileBatch_WillDelegateToEphemeralFileStore() {
-        fileService.deleteFileBatch(BATCH_SIZE);
+        fileService.deleteEphemeralFileBatch(BATCH_SIZE);
 
         verify(ephemeralFileStore).deleteFileBatch(BATCH_SIZE);
     }
