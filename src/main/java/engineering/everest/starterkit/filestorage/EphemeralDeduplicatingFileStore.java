@@ -2,17 +2,15 @@ package engineering.everest.starterkit.filestorage;
 
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
 import static java.util.stream.Collectors.toSet;
-import static org.springframework.data.domain.PageRequest.of;
 
 /**
  * File store that removes duplicate copies of files and manages the mapping of individual file uploads to a single backing file.
@@ -49,14 +47,14 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
     }
 
     public void markAllFilesForDeletion() {
-        List<PersistableFileMapping> persistableFileMappings = fileMappingRepository.findAll();
+        var persistableFileMappings = fileMappingRepository.findAll();
         persistableFileMappings.forEach(persistableFileMapping -> persistableFileMapping.setMarkedForDeletion(true));
         fileMappingRepository.saveAll(persistableFileMappings);
     }
 
     public void deleteFileBatch(int batchSize) {
-        Pageable pageable = of(0, batchSize);
-        Set<String> filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
+        var pageable = PageRequest.of(0, batchSize);
+        var filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
             .map(PersistableFileMapping::getBackingStorageFileId)
             .collect(toSet());
 

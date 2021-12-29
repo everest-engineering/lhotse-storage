@@ -54,7 +54,6 @@ public class InMemoryBackingStore implements BackingStore {
 
     @Override
     public void delete(String fileIdentifier) {
-        throwIfFileNotInFilestore(fileIdentifier);
         fileMapping.remove(fileIdentifier);
     }
 

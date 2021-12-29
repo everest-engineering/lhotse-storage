@@ -102,13 +102,11 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
-    void delete_WillFail_WhenFileIsNotInStore() {
+    void deleteIsIdempotent() {
         var persistedFileId = inMemoryBackingStore.uploadStream(new ByteArrayInputStream(FILE_CONTENTS), FILENAME);
         inMemoryBackingStore.delete(persistedFileId);
-
-        var exception = assertThrows(RuntimeException.class, () -> inMemoryBackingStore.delete(persistedFileId));
-
-        assertEquals(String.format("File '%s' not in filestore", persistedFileId), exception.getMessage());
+        inMemoryBackingStore.delete(persistedFileId);
+        assertThrows(RuntimeException.class, () -> inMemoryBackingStore.downloadAsStream(persistedFileId));
     }
 
     @Test
