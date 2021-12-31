@@ -18,14 +18,14 @@ version = gitTagVersion.commitDistance == 0
         : "${gitTagVersion.lastTag}+${gitTagVersion.commitDistance}-SNAPSHOT"
 
 ext {
-    awsSdkVersion = '1.11.887'
+    awsSdkVersion = '1.12.131'
     commonsLangVersion = '3.11'
     guavaVersion = '31.0.1-jre'
     lombokVersion = '1.18.22'
-    springBootVersion = '2.6.0'
+    springBootVersion = '2.6.2'
 
-    junitVersion = '5.8.1'
-    mockitoVersion = '4.1.0'
+    junitVersion = '5.8.2'
+    mockitoVersion = '4.2.0'
 }
 
 dependencyManagement {
