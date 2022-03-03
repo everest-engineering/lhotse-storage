@@ -50,6 +50,11 @@ public class MongoGridFsBackingStore implements BackingStore {
     }
 
     @Override
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) throws IOException {
+        throw new UnsupportedOperationException("Ranged download not yet implemented for MongoGridFsBackingStore");
+    }
+
+    @Override
     public BackingStorageType backingStorageType() {
         return MONGO_GRID_FS;
     }

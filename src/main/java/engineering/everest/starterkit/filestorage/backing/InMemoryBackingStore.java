@@ -1,14 +1,15 @@
 package engineering.everest.starterkit.filestorage.backing;
 
+import engineering.everest.starterkit.filestorage.BackingStorageType;
 import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.BackingStorageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,15 @@ public class InMemoryBackingStore implements BackingStore {
 
         var fileMetadata = fileMapping.get(fileIdentifier);
         return new InputStreamOfKnownLength(new ByteArrayInputStream(fileMetadata.getContent()), fileMetadata.getLength());
+    }
+
+    @Override
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) throws IOException {
+        throwIfFileNotInFilestore(fileIdentifier);
+
+        var fileMetadata = fileMapping.get(fileIdentifier);
+        var content = Arrays.copyOfRange(fileMetadata.getContent(), (int) startingOffset, (int) fileMetadata.getLength());
+        return new InputStreamOfKnownLength(new ByteArrayInputStream(content), content.length);
     }
 
     @Override

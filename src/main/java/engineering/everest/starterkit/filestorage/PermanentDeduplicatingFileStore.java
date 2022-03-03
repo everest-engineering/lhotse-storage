@@ -49,6 +49,7 @@ public class PermanentDeduplicatingFileStore {
      * @param  originalFilename to record. Typically the original filename a user would associate with the file contents.
      * @param  inputStream      containing content to upload. Managed by the caller.
      * @return                  persisted file information
+     * @throws IOException      if the file could not be persisted
      */
     public PersistedFile uploadAsStream(String originalFilename, InputStream inputStream) throws IOException {
         try (var countingInputStream = new CountingInputStream(inputStream);
@@ -70,6 +71,7 @@ public class PermanentDeduplicatingFileStore {
      * @param  fileSize         in bytes
      * @param  inputStream      containing content to upload. Managed by the caller.
      * @return                  persisted file information
+     * @throws IOException      if the file could not be persisted
      */
     public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
@@ -91,8 +93,13 @@ public class PermanentDeduplicatingFileStore {
      * @throws IOException            if the file doesn't exist or could not be read
      */
     public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
+        return downloadAsStream(persistableFileMapping, 0L);
+    }
+
+    public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping, long startingOffset)
+        throws IOException {
         PersistedFileIdentifier persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
-        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId());
+        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId(), startingOffset);
     }
 
     private PersistedFile persistDeduplicateAndUpdateFileMapping(String sha256,

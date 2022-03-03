@@ -124,4 +124,12 @@ class InMemoryBackingStoreTest {
         inMemoryBackingStore.deleteFiles(Set.of(persistedFileId));
         assertThrows(RuntimeException.class, () -> inMemoryBackingStore.downloadAsStream(persistedFileId));
     }
+
+    @Test
+    void downloadAsStream_WillStartAtGivenOffset() throws IOException {
+        var persistedFileId = inMemoryBackingStore.uploadStream(new ByteArrayInputStream(FILE_CONTENTS), FILENAME);
+
+        var leftoverContent = inMemoryBackingStore.downloadAsStream(persistedFileId, 44L).getInputStream().readAllBytes();
+        assertEquals("this one is my own.", new String(leftoverContent));
+    }
 }

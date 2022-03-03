@@ -113,13 +113,13 @@ class FileServiceTest {
     @Test
     void stream_WillDelegateToPermanentFileStore_WhenFileMapsToPermanentStore() throws IOException {
         UUID fileId = randomUUID();
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping =
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
+        var persistableFileMapping =
             new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
-        ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
+        var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.downloadAsStream(persistableFileMapping))
+        when(permanentFileStore.downloadAsStream(persistableFileMapping, 0L))
             .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
@@ -129,13 +129,12 @@ class FileServiceTest {
     @Test
     void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
         UUID fileId = randomUUID();
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
-        PersistableFileMapping persistableFileMapping =
-            new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
-        ByteArrayInputStream inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
+        var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.downloadAsStream(persistableFileMapping))
+        when(ephemeralFileStore.downloadAsStream(persistableFileMapping, 0L))
             .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
@@ -145,7 +144,7 @@ class FileServiceTest {
     @Test
     void markFileForDeletion_WillDelegateToEphemeralFileStore() {
         UUID fileId = randomUUID();
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
 
         fileService.markEphemeralFileForDeletion(persistedFileIdentifier);
 
@@ -155,7 +154,7 @@ class FileServiceTest {
     @Test
     void markFilesForDeletion_WillDelegateToEphemeralFileStore() {
         UUID fileId = randomUUID();
-        PersistedFileIdentifier persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
         Set<PersistedFileIdentifier> persistedFileIdentifier1 = Set.of(persistedFileIdentifier);
 
         fileService.markEphemeralFilesForDeletion(persistedFileIdentifier1);

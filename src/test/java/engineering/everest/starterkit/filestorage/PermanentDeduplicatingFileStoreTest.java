@@ -63,7 +63,7 @@ class PermanentDeduplicatingFileStoreTest {
             return fileIdentifier;
         });
 
-        PersistedFile persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
+        var persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verifyNoMoreInteractions(backingStore);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS, fileIdentifier,
@@ -92,7 +92,7 @@ class PermanentDeduplicatingFileStoreTest {
                 new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512,
                     FILE_SIZE, false)));
 
-        PersistedFile persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
+        var persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, createTempFileWithContents());
 
         verify(backingStore).delete(fileIdentifier);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS,
@@ -121,8 +121,7 @@ class PermanentDeduplicatingFileStoreTest {
                 new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512,
                     FILE_SIZE, false)));
 
-        PersistedFile persistedFile =
-            permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, FILE_SIZE, createTempFileWithContents());
+        var persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, FILE_SIZE, createTempFileWithContents());
 
         verify(backingStore).delete(fileIdentifier);
         verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS,
@@ -135,14 +134,14 @@ class PermanentDeduplicatingFileStoreTest {
     @Test
     void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
-        when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
+        when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 0L))
             .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
 
-        PersistableFileMapping persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS,
+        var persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
-        InputStreamOfKnownLength inputStreamOfKnownLength = permanentDeduplicatingFileStore.downloadAsStream(persistableFileMapping);
+        var inputStreamOfKnownLength = permanentDeduplicatingFileStore.downloadAsStream(persistableFileMapping);
 
-        verify(backingStore).downloadAsStream(EXISTING_BACKING_STORE_FILE_ID);
+        verify(backingStore).downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 0L);
         assertEquals(inputStreamOfKnownLength.getLength(), FILE_SIZE);
         assertEquals(inputStreamOfKnownLength.getInputStream(), inputStream);
     }

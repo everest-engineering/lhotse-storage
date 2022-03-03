@@ -68,6 +68,18 @@ public interface BackingStore {
     InputStreamOfKnownLength downloadAsStream(String fileIdentifier) throws IOException;
 
     /**
+     * Streaming download starting from a given offset.
+     * <p>
+     * Callers are responsible for closing the returned input stream.
+     *
+     * @param  fileIdentifier returned when a file was uploaded to the file store
+     * @param  startingOffset binary offset into the file from which to start streaming from
+     * @return                an input stream of known length
+     * @throws IOException    if the file doesn't exist or could not be read
+     */
+    InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) throws IOException;
+
+    /**
      * @return the backing storage type of the filestore
      */
     BackingStorageType backingStorageType();

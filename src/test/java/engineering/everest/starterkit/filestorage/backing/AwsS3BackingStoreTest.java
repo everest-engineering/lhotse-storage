@@ -2,6 +2,7 @@ package engineering.everest.starterkit.filestorage.backing;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
-import static java.util.Arrays.asList;
 import static java.util.Set.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -81,16 +81,36 @@ class AwsS3BackingStoreTest {
     void downloadAsStream_WillFetchTheObjectFromS3Bucket() {
         var fileIdentifier = "s3://bucket/fileName";
         var mockS3Object = mock(S3Object.class);
-        ObjectMetadata objectMetadata = mock(ObjectMetadata.class);
+        var objectMetadata = mock(ObjectMetadata.class);
         when(mockS3Object.getObjectMetadata()).thenReturn(objectMetadata);
         when(objectMetadata.getInstanceLength()).thenReturn(10L);
 
         when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
-        when(amazonS3.getObject("bucket", "fileName")).thenReturn(mockS3Object);
+        var getObjectRequest = new GetObjectRequest("bucket", "fileName");
+        getObjectRequest.setRange(0L);
+        when(amazonS3.getObject(getObjectRequest)).thenReturn(mockS3Object);
 
         var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier);
         assertEquals(10L, inputStreamOfKnownLength.getLength());
-        verify(amazonS3).getObject("bucket", "fileName");
+        verify(amazonS3).getObject(getObjectRequest);
+    }
+
+    @Test
+    void downloadAsStream_WillFetchTruncatedObjectFromS3Bucket_WhenStartingAtGivenOffset() {
+        var fileIdentifier = "s3://bucket/fileName";
+        var mockS3Object = mock(S3Object.class);
+        var objectMetadata = mock(ObjectMetadata.class);
+        when(mockS3Object.getObjectMetadata()).thenReturn(objectMetadata);
+        when(objectMetadata.getInstanceLength()).thenReturn(4L);
+
+        when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
+        var getObjectRequest = new GetObjectRequest("bucket", "fileName");
+        getObjectRequest.setRange(6L);
+        when(amazonS3.getObject(getObjectRequest)).thenReturn(mockS3Object);
+
+        var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier, 6L);
+        assertEquals(4L, inputStreamOfKnownLength.getLength());
+        verify(amazonS3).getObject(getObjectRequest);
     }
 
     @Test
@@ -106,7 +126,7 @@ class AwsS3BackingStoreTest {
 
         ArgumentCaptor<DeleteObjectsRequest> captor = ArgumentCaptor.forClass(DeleteObjectsRequest.class);
         new DeleteObjectsRequest("bucket")
-            .withKeys(asList(new DeleteObjectsRequest.KeyVersion("fileName", "L4kqtJlcpXroDTDmpUMLUo")))
+            .withKeys(List.of(new DeleteObjectsRequest.KeyVersion("fileName", "L4kqtJlcpXroDTDmpUMLUo")))
             .withQuiet(false);
         verify(amazonS3).deleteObjects(captor.capture());
 

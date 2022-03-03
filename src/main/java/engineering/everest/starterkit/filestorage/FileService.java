@@ -48,6 +48,7 @@ public class FileService {
      * @param  originalFilename to record for the file
      * @param  inputStream      to read from. Must be closed by the caller.
      * @return                  UUID assigned to this file.
+     * @throws IOException      if the file could not be persisted
      */
     public UUID transferToPermanentStore(String originalFilename, InputStream inputStream) throws IOException {
         return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, inputStream).getPersistedFileIdentifier().getFileId();
@@ -58,7 +59,9 @@ public class FileService {
      *
      * @param  originalFilename to record for the file
      * @param  inputStream      to read from. Must be closed by the caller.
+     * @param  fileSize         size of the file
      * @return                  UUID assigned to this file.
+     * @throws IOException      if the file could not be persisted
      */
     public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier()
@@ -71,6 +74,7 @@ public class FileService {
      * @param  filename    to record for the file
      * @param  inputStream to read from. Must be closed by the caller.
      * @return             UUID assigned to this file.
+     * @throws IOException if the file could not be persisted
      */
     public UUID transferToEphemeralStore(String filename, InputStream inputStream) throws IOException {
         return ephemeralDeduplicatingFileStore.uploadAsStream(filename, inputStream).getPersistedFileIdentifier().getFileId();
@@ -81,6 +85,7 @@ public class FileService {
      *
      * @param  inputStream to read from. Must be closed by the caller.
      * @return             UUID assigned to this file.
+     * @throws IOException if the file could not be persisted
      */
     public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
         return transferToEphemeralStore("", inputStream);
@@ -94,11 +99,15 @@ public class FileService {
      * @throws IOException if the file cannot be read
      */
     public InputStreamOfKnownLength stream(UUID fileId) throws IOException {
+        return stream(fileId, 0L);
+    }
+
+    public InputStreamOfKnownLength stream(UUID fileId, long startingOffset) throws IOException {
         PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT)
             ? permanentDeduplicatingFileStore
             : ephemeralDeduplicatingFileStore;
-        return fileStore.downloadAsStream(persistableFileMapping);
+        return fileStore.downloadAsStream(persistableFileMapping, startingOffset);
     }
 
     /**

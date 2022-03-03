@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
@@ -47,9 +48,17 @@ public class AwsS3BackingStore implements BackingStore {
     @Override
     @SuppressWarnings("PMD.CloseResource")
     public InputStreamOfKnownLength downloadAsStream(String fileIdentifier) {
-        AmazonS3URI s3URI = new AmazonS3URI(fileIdentifier);
+        return downloadAsStream(fileIdentifier, 0L);
+    }
+
+    @Override
+    @SuppressWarnings("PMD.CloseResource")
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) {
+        var s3URI = new AmazonS3URI(fileIdentifier);
         if (amazonS3.doesObjectExist(s3URI.getBucket(), s3URI.getKey())) {
-            var s3Object = amazonS3.getObject(s3URI.getBucket(), s3URI.getKey());
+            var objectRequest = new GetObjectRequest(s3URI.getBucket(), s3URI.getKey());
+            objectRequest.setRange(startingOffset);
+            var s3Object = amazonS3.getObject(objectRequest);
             return new InputStreamOfKnownLength(s3Object.getObjectContent(), s3Object.getObjectMetadata().getInstanceLength());
         } else {
             throw new BackingFileStoreException(String.format("Unable to retrieve file: %s", fileIdentifier));
