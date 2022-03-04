@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
 import static engineering.everest.starterkit.filestorage.FileStoreType.EPHEMERAL;
 import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
 import static engineering.everest.starterkit.filestorage.BackingStorageType.MONGO_GRID_FS;
@@ -111,11 +112,22 @@ class FileServiceTest {
     }
 
     @Test
+    void fileSizeInBytes_WillReturnSizePersistedInFileMapping() {
+        UUID fileId = randomUUID();
+        var persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, AWS_S3, "native-file-id");
+        var persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, AWS_S3, "native-file-id",
+            "", "", 87654321L, false);
+        when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
+
+        assertEquals(87654321L, fileService.fileSizeInBytes(fileId));
+    }
+
+    @Test
     void stream_WillDelegateToPermanentFileStore_WhenFileMapsToPermanentStore() throws IOException {
         UUID fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
-        var persistableFileMapping =
-            new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
+        var persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id",
+            "", "", 123L, false);
         var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
@@ -130,7 +142,8 @@ class FileServiceTest {
     void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
         UUID fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
-        var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id", "", "", 123L, false);
+        var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id",
+            "", "", 123L, false);
         var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));

@@ -96,9 +96,19 @@ public class PermanentDeduplicatingFileStore {
         return downloadAsStream(persistableFileMapping, 0L);
     }
 
+    /**
+     * Streaming download starting at a given offset
+     * <p>
+     * Callers are responsible for closing the returned input stream.
+     *
+     * @param  persistableFileMapping returned when a file was uploaded to the file store
+     * @param  startingOffset         binary offset into the file from which to start streaming from
+     * @return                        an input stream of known length
+     * @throws IOException            if the file doesn't exist or could not be read
+     */
     public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping, long startingOffset)
         throws IOException {
-        PersistedFileIdentifier persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
+        var persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
         return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId(), startingOffset);
     }
 

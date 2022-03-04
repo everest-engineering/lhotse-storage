@@ -1,7 +1,6 @@
 package engineering.everest.starterkit.filestorage;
 
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
-import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,7 +91,17 @@ public class FileService {
     }
 
     /**
-     * Streaming download of file.
+     * Size of a file
+     *
+     * @param  fileId is the UUID originally assigned to the file.
+     * @return        size in bytes
+     */
+    public long fileSizeInBytes(UUID fileId) {
+        return fileMappingRepository.findById(fileId).orElseThrow().getFileSizeBytes();
+    }
+
+    /**
+     * Streaming download of file
      *
      * @param  fileId      is the UUID originally assigned to the file.
      * @return             input stream of known length
@@ -102,8 +111,16 @@ public class FileService {
         return stream(fileId, 0L);
     }
 
+    /**
+     * Streaming download of file starting at a given offset
+     *
+     * @param  fileId         is the UUID originally assigned to the file.
+     * @param  startingOffset binary offset into the file from which to start streaming from
+     * @return                input stream of known length
+     * @throws IOException    if the file cannot be read
+     */
     public InputStreamOfKnownLength stream(UUID fileId, long startingOffset) throws IOException {
-        PersistableFileMapping persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
+        var persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT)
             ? permanentDeduplicatingFileStore
             : ephemeralDeduplicatingFileStore;
