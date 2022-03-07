@@ -86,30 +86,27 @@ class AwsS3BackingStoreTest {
         when(objectMetadata.getInstanceLength()).thenReturn(10L);
 
         when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
-        var getObjectRequest = new GetObjectRequest("bucket", "fileName");
-        getObjectRequest.setRange(0L);
-        when(amazonS3.getObject(getObjectRequest)).thenReturn(mockS3Object);
+        when(amazonS3.getObject("bucket", "fileName")).thenReturn(mockS3Object);
 
         var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier);
         assertEquals(10L, inputStreamOfKnownLength.getLength());
-        verify(amazonS3).getObject(getObjectRequest);
     }
 
     @Test
-    void downloadAsStream_WillFetchTruncatedObjectFromS3Bucket_WhenStartingAtGivenOffset() {
+    void downloadAsStream_WillFetchTruncatedObjectFromS3Bucket_WhenRangeSpecified() {
         var fileIdentifier = "s3://bucket/fileName";
         var mockS3Object = mock(S3Object.class);
         var objectMetadata = mock(ObjectMetadata.class);
         when(mockS3Object.getObjectMetadata()).thenReturn(objectMetadata);
-        when(objectMetadata.getInstanceLength()).thenReturn(4L);
+        when(objectMetadata.getInstanceLength()).thenReturn(2L);
 
         when(amazonS3.doesObjectExist("bucket", "fileName")).thenReturn(true);
         var getObjectRequest = new GetObjectRequest("bucket", "fileName");
-        getObjectRequest.setRange(6L);
+        getObjectRequest.setRange(6L, 8L);
         when(amazonS3.getObject(getObjectRequest)).thenReturn(mockS3Object);
 
-        var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier, 6L);
-        assertEquals(4L, inputStreamOfKnownLength.getLength());
+        var inputStreamOfKnownLength = fileStore.downloadAsStream(fileIdentifier, 6L, 8L);
+        assertEquals(2L, inputStreamOfKnownLength.getLength());
         verify(amazonS3).getObject(getObjectRequest);
     }
 

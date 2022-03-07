@@ -48,16 +48,22 @@ public class AwsS3BackingStore implements BackingStore {
     @Override
     @SuppressWarnings("PMD.CloseResource")
     public InputStreamOfKnownLength downloadAsStream(String fileIdentifier) {
-        return downloadAsStream(fileIdentifier, 0L);
+        var s3URI = new AmazonS3URI(fileIdentifier);
+        if (amazonS3.doesObjectExist(s3URI.getBucket(), s3URI.getKey())) {
+            var s3Object = amazonS3.getObject(s3URI.getBucket(), s3URI.getKey());
+            return new InputStreamOfKnownLength(s3Object.getObjectContent(), s3Object.getObjectMetadata().getInstanceLength());
+        } else {
+            throw new BackingFileStoreException(String.format("Unable to retrieve file: %s", fileIdentifier));
+        }
     }
 
     @Override
     @SuppressWarnings("PMD.CloseResource")
-    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) {
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset, long endingOffset) {
         var s3URI = new AmazonS3URI(fileIdentifier);
         if (amazonS3.doesObjectExist(s3URI.getBucket(), s3URI.getKey())) {
             var objectRequest = new GetObjectRequest(s3URI.getBucket(), s3URI.getKey());
-            objectRequest.setRange(startingOffset);
+            objectRequest.setRange(startingOffset, endingOffset);
             var s3Object = amazonS3.getObject(objectRequest);
             return new InputStreamOfKnownLength(s3Object.getObjectContent(), s3Object.getObjectMetadata().getInstanceLength());
         } else {

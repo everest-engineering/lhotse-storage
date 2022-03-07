@@ -72,11 +72,11 @@ public class InMemoryBackingStore implements BackingStore {
     }
 
     @Override
-    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset) throws IOException {
+    public InputStreamOfKnownLength downloadAsStream(String fileIdentifier, long startingOffset, long endingOffset) throws IOException {
         throwIfFileNotInFilestore(fileIdentifier);
 
         var fileMetadata = fileMapping.get(fileIdentifier);
-        var content = Arrays.copyOfRange(fileMetadata.getContent(), (int) startingOffset, (int) fileMetadata.getLength());
+        var content = Arrays.copyOfRange(fileMetadata.getContent(), (int) startingOffset, (int) endingOffset + 1);
         return new InputStreamOfKnownLength(new ByteArrayInputStream(content), content.length);
     }
 

@@ -134,14 +134,14 @@ class PermanentDeduplicatingFileStoreTest {
     @Test
     void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
-        when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 0L))
+        when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
             .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
 
         var persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
         var inputStreamOfKnownLength = permanentDeduplicatingFileStore.downloadAsStream(persistableFileMapping);
 
-        verify(backingStore).downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 0L);
+        verify(backingStore).downloadAsStream(EXISTING_BACKING_STORE_FILE_ID);
         assertEquals(inputStreamOfKnownLength.getLength(), FILE_SIZE);
         assertEquals(inputStreamOfKnownLength.getInputStream(), inputStream);
     }

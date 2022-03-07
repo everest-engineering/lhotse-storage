@@ -120,11 +120,24 @@ public class FileService {
      * @throws IOException    if the file cannot be read
      */
     public InputStreamOfKnownLength stream(UUID fileId, long startingOffset) throws IOException {
+        return stream(fileId, startingOffset, fileSizeInBytes(fileId));
+    }
+
+    /**
+     * Streaming download of file starting at a given offset
+     *
+     * @param  fileId         is the UUID originally assigned to the file.
+     * @param  startingOffset binary offset into the file from which to start streaming from
+     * @param  endingOffset   binary offset into the file to stream to (inclusive)
+     * @return                input stream of known length
+     * @throws IOException    if the file cannot be read
+     */
+    public InputStreamOfKnownLength stream(UUID fileId, long startingOffset, long endingOffset) throws IOException {
         var persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
         var fileStore = persistableFileMapping.getFileStoreType().equals(PERMANENT)
             ? permanentDeduplicatingFileStore
             : ephemeralDeduplicatingFileStore;
-        return fileStore.downloadAsStream(persistableFileMapping, startingOffset);
+        return fileStore.downloadAsStream(persistableFileMapping, startingOffset, endingOffset);
     }
 
     /**

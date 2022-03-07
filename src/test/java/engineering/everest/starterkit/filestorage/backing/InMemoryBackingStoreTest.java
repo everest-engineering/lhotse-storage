@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 class InMemoryBackingStoreTest {
 
     private static final String FILENAME = "my-filename";
-    private static byte[] FILE_CONTENTS = "This is my file. There are many like it but this one is my own.".getBytes();
+    private static final byte[] FILE_CONTENTS = "This is my file. There are many like it but this one is my own.".getBytes();
 
     private InMemoryBackingStore inMemoryBackingStore;
 
@@ -126,10 +126,10 @@ class InMemoryBackingStoreTest {
     }
 
     @Test
-    void downloadAsStream_WillStartAtGivenOffset() throws IOException {
+    void downloadAsStream_WillStreamRange() throws IOException {
         var persistedFileId = inMemoryBackingStore.uploadStream(new ByteArrayInputStream(FILE_CONTENTS), FILENAME);
 
-        var leftoverContent = inMemoryBackingStore.downloadAsStream(persistedFileId, 44L).getInputStream().readAllBytes();
-        assertEquals("this one is my own.", new String(leftoverContent));
+        var leftoverContent = inMemoryBackingStore.downloadAsStream(persistedFileId, 44L, 47L).getInputStream().readAllBytes();
+        assertEquals("this", new String(leftoverContent));
     }
 }

@@ -84,7 +84,7 @@ public class PermanentDeduplicatingFileStore {
     }
 
     /**
-     * Streaming download.
+     * Streaming download
      * <p>
      * Callers are responsible for closing the returned input stream.
      *
@@ -93,7 +93,8 @@ public class PermanentDeduplicatingFileStore {
      * @throws IOException            if the file doesn't exist or could not be read
      */
     public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping) throws IOException {
-        return downloadAsStream(persistableFileMapping, 0L);
+        var persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
+        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId());
     }
 
     /**
@@ -103,13 +104,14 @@ public class PermanentDeduplicatingFileStore {
      *
      * @param  persistableFileMapping returned when a file was uploaded to the file store
      * @param  startingOffset         binary offset into the file from which to start streaming from
+     * @param  endingOffset           binary offset into the file from which to start streaming from
      * @return                        an input stream of known length
      * @throws IOException            if the file doesn't exist or could not be read
      */
-    public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping, long startingOffset)
+    public InputStreamOfKnownLength downloadAsStream(PersistableFileMapping persistableFileMapping, long startingOffset, long endingOffset)
         throws IOException {
         var persistedFileIdentifier = persistableFileMapping.getPersistedFileIdentifier();
-        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId(), startingOffset);
+        return backingStore.downloadAsStream(persistedFileIdentifier.getBackingStorageFileId(), startingOffset, endingOffset);
     }
 
     private PersistedFile persistDeduplicateAndUpdateFileMapping(String sha256,
