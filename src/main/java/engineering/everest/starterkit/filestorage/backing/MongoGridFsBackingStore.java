@@ -1,7 +1,5 @@
 package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.BackingStorageType;
-import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Query;
@@ -11,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.MONGO_GRID_FS;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.MONGO_GRID_FS;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 

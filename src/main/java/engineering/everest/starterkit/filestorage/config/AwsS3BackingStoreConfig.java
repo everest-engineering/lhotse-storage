@@ -5,7 +5,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.util.StringUtils;
-import engineering.everest.starterkit.filestorage.BackingStore;
+import engineering.everest.starterkit.filestorage.backing.BackingStore;
 import engineering.everest.starterkit.filestorage.backing.AwsS3BackingStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

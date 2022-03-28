@@ -1,6 +1,5 @@
 package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.BackingStorageType;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

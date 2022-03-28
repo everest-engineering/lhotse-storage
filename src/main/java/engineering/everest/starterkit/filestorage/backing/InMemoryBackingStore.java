@@ -1,7 +1,5 @@
 package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.BackingStorageType;
-import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.IN_MEMORY;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.IN_MEMORY;
 import static java.util.UUID.randomUUID;
 
 /**

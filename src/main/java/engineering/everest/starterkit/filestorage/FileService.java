@@ -1,5 +1,7 @@
 package engineering.everest.starterkit.filestorage;
 
+import engineering.everest.starterkit.filestorage.filestores.EphemeralDeduplicatingFileStore;
+import engineering.everest.starterkit.filestorage.filestores.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 
 import java.io.File;
@@ -8,7 +10,7 @@ import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
-import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
+import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.PERMANENT;
 import static java.nio.file.Files.createTempFile;
 
 /**

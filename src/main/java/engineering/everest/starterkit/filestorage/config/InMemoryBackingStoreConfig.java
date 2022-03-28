@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.filestorage.config;
 
-import engineering.everest.starterkit.filestorage.BackingStore;
+import engineering.everest.starterkit.filestorage.backing.BackingStore;
 import engineering.everest.starterkit.filestorage.backing.InMemoryBackingStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

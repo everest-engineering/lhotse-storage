@@ -6,14 +6,12 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import engineering.everest.starterkit.filestorage.BackingStore;
 import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
-import engineering.everest.starterkit.filestorage.BackingStorageType;
 
 import java.io.InputStream;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.AWS_S3;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 

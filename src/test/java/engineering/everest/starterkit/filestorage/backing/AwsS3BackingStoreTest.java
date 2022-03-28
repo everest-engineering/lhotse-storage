@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.AWS_S3;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.AWS_S3;
 import static java.util.Set.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

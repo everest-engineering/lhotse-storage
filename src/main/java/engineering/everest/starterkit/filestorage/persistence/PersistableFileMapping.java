@@ -1,7 +1,7 @@
 package engineering.everest.starterkit.filestorage.persistence;
 
-import engineering.everest.starterkit.filestorage.FileStoreType;
-import engineering.everest.starterkit.filestorage.BackingStorageType;
+import engineering.everest.starterkit.filestorage.filestores.FileStoreType;
+import engineering.everest.starterkit.filestorage.backing.BackingStorageType;
 import engineering.everest.starterkit.filestorage.PersistedFileIdentifier;
 import lombok.AllArgsConstructor;
 import lombok.Data;

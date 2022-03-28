@@ -1,5 +1,7 @@
 package engineering.everest.starterkit.filestorage;
 
+import engineering.everest.starterkit.filestorage.backing.BackingStore;
+import engineering.everest.starterkit.filestorage.filestores.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.MONGO_GRID_FS;
-import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.MONGO_GRID_FS;
+import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.PERMANENT;
 import static java.nio.file.Files.createTempFile;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;

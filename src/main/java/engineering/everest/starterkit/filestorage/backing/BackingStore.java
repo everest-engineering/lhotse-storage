@@ -1,7 +1,7 @@
-package engineering.everest.starterkit.filestorage;
+package engineering.everest.starterkit.filestorage.backing;
 
-import engineering.everest.starterkit.filestorage.backing.AwsS3BackingStore;
-import engineering.everest.starterkit.filestorage.backing.MongoGridFsBackingStore;
+import engineering.everest.starterkit.filestorage.FileService;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
 
 import java.io.IOException;
 import java.io.InputStream;

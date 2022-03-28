@@ -1,6 +1,6 @@
 package engineering.everest.starterkit.filestorage.persistence;
 
-import engineering.everest.starterkit.filestorage.FileStoreType;
+import engineering.everest.starterkit.filestorage.filestores.FileStoreType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

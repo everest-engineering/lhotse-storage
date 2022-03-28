@@ -1,4 +1,4 @@
-package engineering.everest.starterkit.filestorage;
+package engineering.everest.starterkit.filestorage.backing;
 
 public enum BackingStorageType {
     IN_MEMORY,

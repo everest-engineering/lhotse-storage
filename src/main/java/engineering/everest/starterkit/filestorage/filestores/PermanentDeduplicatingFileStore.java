@@ -1,8 +1,12 @@
-package engineering.everest.starterkit.filestorage;
+package engineering.everest.starterkit.filestorage.filestores;
 
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.CountingInputStream;
+import engineering.everest.starterkit.filestorage.backing.BackingStorageType;
+import engineering.everest.starterkit.filestorage.backing.BackingStore;
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
+import engineering.everest.starterkit.filestorage.PersistedFile;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import org.springframework.data.domain.Example;
@@ -11,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import static engineering.everest.starterkit.filestorage.FileStoreType.PERMANENT;
+import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.PERMANENT;
 import static java.util.UUID.randomUUID;
 
 /**

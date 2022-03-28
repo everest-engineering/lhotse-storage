@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import static engineering.everest.starterkit.filestorage.BackingStorageType.IN_MEMORY;
+import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.IN_MEMORY;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

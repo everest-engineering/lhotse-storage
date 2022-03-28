@@ -1,5 +1,7 @@
 package engineering.everest.starterkit.filestorage;
 
+import engineering.everest.starterkit.filestorage.backing.BackingStorageType;
+import engineering.everest.starterkit.filestorage.filestores.FileStoreType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

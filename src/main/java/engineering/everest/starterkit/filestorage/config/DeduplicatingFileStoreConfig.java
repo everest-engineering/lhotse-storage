@@ -1,9 +1,9 @@
 package engineering.everest.starterkit.filestorage.config;
 
-import engineering.everest.starterkit.filestorage.EphemeralDeduplicatingFileStore;
+import engineering.everest.starterkit.filestorage.filestores.EphemeralDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.FileService;
-import engineering.everest.starterkit.filestorage.BackingStore;
-import engineering.everest.starterkit.filestorage.PermanentDeduplicatingFileStore;
+import engineering.everest.starterkit.filestorage.backing.BackingStore;
+import engineering.everest.starterkit.filestorage.filestores.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
