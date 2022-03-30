@@ -13,7 +13,7 @@ import static java.lang.Math.min;
  * An input stream for wrapping an object store input stream beginning at a non-zero offset. Ensures that the necessary number of bytes have
  * been skipped.
  */
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
 public class PartialInputStream extends InputStream {
 
