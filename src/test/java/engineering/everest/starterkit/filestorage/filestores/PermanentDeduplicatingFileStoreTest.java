@@ -1,7 +1,8 @@
-package engineering.everest.starterkit.filestorage;
+package engineering.everest.starterkit.filestorage.filestores;
 
+import engineering.everest.starterkit.filestorage.InputStreamOfKnownLength;
+import engineering.everest.starterkit.filestorage.PersistedFile;
 import engineering.everest.starterkit.filestorage.backing.BackingStore;
-import engineering.everest.starterkit.filestorage.filestores.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
 import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 import org.junit.jupiter.api.BeforeEach;
