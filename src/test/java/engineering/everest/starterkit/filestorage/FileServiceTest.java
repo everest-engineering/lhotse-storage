@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -158,23 +159,28 @@ class FileServiceTest {
 
     @Test
     void markFileForDeletion_WillDelegateToEphemeralFileStore() {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
+        var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id",
+            "", "", 123L, false);
+        when(fileMappingRepository.findById(fileId)).thenReturn(Optional.of(persistableFileMapping));
 
-        fileService.markEphemeralFileForDeletion(persistedFileIdentifier);
+        fileService.markEphemeralFileForDeletion(fileId);
 
         verify(ephemeralFileStore).markFileForDeletion(persistedFileIdentifier);
     }
 
     @Test
     void markFilesForDeletion_WillDelegateToEphemeralFileStore() {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
-        Set<PersistedFileIdentifier> persistedFileIdentifier1 = Set.of(persistedFileIdentifier);
+        var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id",
+            "", "", 123L, false);
+        when(fileMappingRepository.findAllById(Set.of(fileId))).thenReturn(List.of(persistableFileMapping));
 
-        fileService.markEphemeralFilesForDeletion(persistedFileIdentifier1);
+        fileService.markEphemeralFilesForDeletion(Set.of(fileId));
 
-        verify(ephemeralFileStore).markFilesForDeletion(persistedFileIdentifier1);
+        verify(ephemeralFileStore).markFilesForDeletion(List.of(persistedFileIdentifier));
     }
 
     @Test

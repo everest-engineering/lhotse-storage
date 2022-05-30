@@ -8,8 +8,8 @@ import engineering.everest.starterkit.filestorage.persistence.PersistableFileMap
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.EPHEMERAL;
@@ -38,8 +38,10 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
         return super.downloadAsStream(persistableFileMapping);
     }
 
-    public void markFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
-        persistedFileIdentifiers.forEach(this::markFileForDeletion);
+    public void markFilesForDeletion(List<PersistedFileIdentifier> persistedFileIdentifiers) {
+        persistedFileIdentifiers.forEach(identifier -> checkArgument(identifier.getFileStoreType() == EPHEMERAL));
+        persistedFileIdentifiers.forEach(identifier -> fileMappingRepository.findById(identifier.getFileId())
+            .ifPresent(this::markPersistedFileForDeletion));
     }
 
     public void markFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {

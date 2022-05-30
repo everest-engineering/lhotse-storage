@@ -132,8 +132,7 @@ public class PermanentDeduplicatingFileStore {
                                                   String uploadSha512,
                                                   long fileSizeBytes,
                                                   BackingStorageType backingStorageType) {
-        Optional<PersistableFileMapping> existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
-
+        var existingFileMapping = searchForExistingFileMappingToBothHashes(uploadSha256, uploadSha512);
         if (existingFileMapping.isPresent()) {
             deletePersistedFile(fileIdentifier);
             return new PersistedFile(randomUUID(), fileStoreType, backingStorageType, existingFileMapping.get().getBackingStorageFileId(),

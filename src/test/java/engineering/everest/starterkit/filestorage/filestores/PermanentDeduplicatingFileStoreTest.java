@@ -17,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.MONGO_GRID_FS;
@@ -136,7 +135,7 @@ class PermanentDeduplicatingFileStoreTest {
 
     @Test
     void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
+        var inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
         when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
             .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
 
@@ -149,8 +148,24 @@ class PermanentDeduplicatingFileStoreTest {
         assertEquals(inputStreamOfKnownLength.getInputStream(), inputStream);
     }
 
+    @Test
+    void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStoreWithGivenStartingAndEndingOffsets() throws IOException {
+        var inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
+        when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 1234L, 5678L))
+            .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
+
+        var persistableFileMapping = new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS,
+            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+        var inputStreamOfKnownLength = permanentDeduplicatingFileStore.downloadAsStream(
+            persistableFileMapping, 1234L, 5678L);
+
+        verify(backingStore).downloadAsStream(EXISTING_BACKING_STORE_FILE_ID, 1234L, 5678L);
+        assertEquals(inputStreamOfKnownLength.getLength(), FILE_SIZE);
+        assertEquals(inputStreamOfKnownLength.getInputStream(), inputStream);
+    }
+
     private InputStream createTempFileWithContents() throws IOException {
-        Path tempPath = createTempFile("unit", "test");
+        var tempPath = createTempFile("unit", "test");
         try (var outStream = Files.newOutputStream(tempPath)) {
             outStream.write(TEMPORARY_FILE_CONTENTS.getBytes());
             outStream.flush();

@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -60,8 +59,8 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void markFileForDeletion_WillMarkFileForDeletionInFileMappingRepository() {
-        UUID uuid = randomUUID();
-        UUID uuid2 = randomUUID();
+        var uuid = randomUUID();
+        var uuid2 = randomUUID();
         when(fileMappingRepository.findById(uuid)).thenReturn(of(new PersistableFileMapping(uuid2, EPHEMERAL, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
@@ -76,7 +75,7 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void markFileForDeletion_WillDoNothingIfFileMappingDoesNotExist() {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         when(fileMappingRepository.findById(fileId)).thenReturn(Optional.empty());
 
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID);
@@ -89,13 +88,13 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void markFilesForDeletion_WillMarkFilesForDeletionInFileMappingRepository() {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         when(fileMappingRepository.findById(fileId)).thenReturn(of(new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false)));
 
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID);
 
-        ephemeralDeduplicatingFileStore.markFilesForDeletion(Set.of(persistedFileIdentifier));
+        ephemeralDeduplicatingFileStore.markFilesForDeletion(List.of(persistedFileIdentifier));
 
         verifyNoInteractions(backingStore);
         verify(fileMappingRepository).save(
@@ -108,7 +107,7 @@ class EphemeralDeduplicatingFileStoreTest {
         var persistedFileIdentifier = new PersistedFileIdentifier(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID);
 
         assertThrows(IllegalArgumentException.class,
-            () -> ephemeralDeduplicatingFileStore.markFilesForDeletion(Set.of(persistedFileIdentifier)));
+            () -> ephemeralDeduplicatingFileStore.markFilesForDeletion(List.of(persistedFileIdentifier)));
     }
 
     @Test
@@ -145,7 +144,7 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
+        var inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
         when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
             .thenReturn(new InputStreamOfKnownLength(inputStream, FILE_SIZE));
 

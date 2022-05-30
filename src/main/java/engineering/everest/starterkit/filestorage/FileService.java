@@ -3,6 +3,7 @@ package engineering.everest.starterkit.filestorage;
 import engineering.everest.starterkit.filestorage.filestores.EphemeralDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.filestores.PermanentDeduplicatingFileStore;
 import engineering.everest.starterkit.filestorage.persistence.FileMappingRepository;
+import engineering.everest.starterkit.filestorage.persistence.PersistableFileMapping;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.PERMANENT;
 import static java.nio.file.Files.createTempFile;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Service layer for working with the permanent and ephemeral file stores.
@@ -145,21 +147,25 @@ public class FileService {
     /**
      * Marking ephemeral files for deletion
      *
-     * @param  persistedFileIdentifiers to mark for deletion
-     * @throws IllegalArgumentException if the file is not ephemeral
+     * @param  fileIds                  to mark for deletion
+     * @throws IllegalArgumentException if any file is not ephemeral
      */
-    public void markEphemeralFilesForDeletion(Set<PersistedFileIdentifier> persistedFileIdentifiers) {
+    public void markEphemeralFilesForDeletion(Set<UUID> fileIds) {
+        var persistedFileIdentifiers = fileMappingRepository.findAllById(fileIds).stream()
+            .map(PersistableFileMapping::getPersistedFileIdentifier)
+            .collect(toList());
         ephemeralDeduplicatingFileStore.markFilesForDeletion(persistedFileIdentifiers);
     }
 
     /**
      * Mark an ephemeral file for deletion
      *
-     * @param  persistedFileIdentifier  to mark for deletion
+     * @param  fileId                   to mark for deletion
      * @throws IllegalArgumentException if the file is not ephemeral
      */
-    public void markEphemeralFileForDeletion(PersistedFileIdentifier persistedFileIdentifier) {
-        ephemeralDeduplicatingFileStore.markFileForDeletion(persistedFileIdentifier);
+    public void markEphemeralFileForDeletion(UUID fileId) {
+        var persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
+        ephemeralDeduplicatingFileStore.markFileForDeletion(persistableFileMapping.getPersistedFileIdentifier());
     }
 
     /**
