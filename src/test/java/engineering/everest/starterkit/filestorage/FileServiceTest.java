@@ -76,6 +76,19 @@ class FileServiceTest {
     }
 
     @Test
+    void transferToPermanentStoreWithFileSize_WillDelegateToPermanentStore() throws IOException {
+        when(permanentFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), eq(42L), any(InputStream.class))).thenReturn(new PersistedFile());
+
+        File tempFile = fileService.createTemporaryFile("upload");
+        try (FileInputStream inputStream = new FileInputStream(tempFile)) {
+            fileService.transferToPermanentStore(ORIGINAL_FILENAME, 42L, inputStream);
+            verify(permanentFileStore).uploadAsStream(ORIGINAL_FILENAME, 42L, inputStream);
+        }
+
+        verifyNoInteractions(ephemeralFileStore);
+    }
+
+    @Test
     void transferToEphemeralStore_WillDelegateToEphemeralStore() throws IOException {
         when(ephemeralFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 

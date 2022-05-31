@@ -67,6 +67,27 @@ public class PermanentDeduplicatingFileStore {
     }
 
     /**
+     * Stream a file to the file store, recording its name.
+     * <p>
+     * Callers are responsible for closing the input stream.
+     *
+     * @param  originalFilename to record. Typically the original filename a user would associate with the file contents.
+     * @param  fileSize         in bytes
+     * @param  inputStream      containing content to upload. Managed by the caller.
+     * @return                  persisted file information
+     * @throws IOException      if the file could not be persisted
+     */
+    public PersistedFile uploadAsStream(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
+        try (var sha256ingInputStream = new HashingInputStream(Hashing.sha256(), inputStream);
+             var sha512ingInputStream = new HashingInputStream(Hashing.sha512(), sha256ingInputStream)) {
+            var fileIdentifier = backingStore.uploadStream(sha512ingInputStream, originalFilename, fileSize);
+
+            return persistDeduplicateAndUpdateFileMapping(sha256ingInputStream.hash().toString(),
+                sha512ingInputStream.hash().toString(), fileIdentifier, fileSize);
+        }
+    }
+
+    /**
      * Streaming download
      * <p>
      * Callers are responsible for closing the returned input stream.
