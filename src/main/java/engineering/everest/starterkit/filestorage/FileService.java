@@ -58,17 +58,29 @@ public class FileService {
     }
 
     /**
-     * Streaming upload of a named file to the permanent file store. File length is provided by the caller.
+     * Streaming upload of a named file to the permanent file store. File length is provided by the caller. <b>This method should be
+     * preferred when using the AWS S3 client.</b>
      *
      * @param  originalFilename to record for the file
-     * @param  inputStream      to read from. Must be closed by the caller.
      * @param  fileSize         size of the file
+     * @param  inputStream      to read from. Must be closed by the caller.
      * @return                  UUID assigned to this file.
      * @throws IOException      if the file could not be persisted
      */
     public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
         return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier()
             .getFileId();
+    }
+
+    /**
+     * Streaming upload of an unnamed file to the ephemeral file store. File length is derived from reading the input stream.
+     *
+     * @param  inputStream to read from. Must be closed by the caller.
+     * @return             UUID assigned to this file.
+     * @throws IOException if the file could not be persisted
+     */
+    public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
+        return transferToEphemeralStore("", inputStream);
     }
 
     /**
@@ -84,14 +96,17 @@ public class FileService {
     }
 
     /**
-     * Streaming upload of an unnamed file to the ephemeral file store. File length is derived from reading the input stream.
+     * Streaming upload of a named file to the ephemeral file store. File length is derived from reading the input stream. <b>This method
+     * should be preferred when using the AWS S3 client.</b>
      *
+     * @param  filename    to record for the file
+     * @param  fileSize    size of the file
      * @param  inputStream to read from. Must be closed by the caller.
      * @return             UUID assigned to this file.
      * @throws IOException if the file could not be persisted
      */
-    public UUID transferToEphemeralStore(InputStream inputStream) throws IOException {
-        return transferToEphemeralStore("", inputStream);
+    public UUID transferToEphemeralStore(String filename, long fileSize, InputStream inputStream) throws IOException {
+        return ephemeralDeduplicatingFileStore.uploadAsStream(filename, fileSize, inputStream).getPersistedFileIdentifier().getFileId();
     }
 
     /**

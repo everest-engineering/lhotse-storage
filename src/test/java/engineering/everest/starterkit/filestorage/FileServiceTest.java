@@ -11,14 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static engineering.everest.starterkit.filestorage.backing.BackingStorageType.AWS_S3;
 import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.EPHEMERAL;
@@ -56,7 +54,7 @@ class FileServiceTest {
 
     @Test
     void createTempFile_WillCreateATemporaryFileMarkedAsDeleteOnExit() throws IOException {
-        File temporaryFile = fileService.createTemporaryFile("upload");
+        var temporaryFile = fileService.createTemporaryFile("upload");
 
         assertTrue(temporaryFile.canWrite());
         assertTrue(temporaryFile.canRead());
@@ -66,7 +64,7 @@ class FileServiceTest {
     void transferToPermanentStore_WillDelegateToPermanentStore() throws IOException {
         when(permanentFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile("upload");
+        var tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToPermanentStore(ORIGINAL_FILENAME, inputStream);
             verify(permanentFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
@@ -79,7 +77,7 @@ class FileServiceTest {
     void transferToPermanentStoreWithFileSize_WillDelegateToPermanentStore() throws IOException {
         when(permanentFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), eq(42L), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile("upload");
+        var tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToPermanentStore(ORIGINAL_FILENAME, 42L, inputStream);
             verify(permanentFileStore).uploadAsStream(ORIGINAL_FILENAME, 42L, inputStream);
@@ -92,7 +90,7 @@ class FileServiceTest {
     void transferToEphemeralStore_WillDelegateToEphemeralStore() throws IOException {
         when(ephemeralFileStore.uploadAsStream(eq(ORIGINAL_FILENAME), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile("upload");
+        var tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(ORIGINAL_FILENAME, inputStream);
             verify(ephemeralFileStore).uploadAsStream(ORIGINAL_FILENAME, inputStream);
@@ -102,10 +100,10 @@ class FileServiceTest {
     }
 
     @Test
-    void transferToEphemeralStore_WillDelegateToEphemeralStore_WhenNoFilenamespecified() throws IOException {
+    void transferToEphemeralStore_WillDelegateToEphemeralStore_WhenNoFilenameSpecified() throws IOException {
         when(ephemeralFileStore.uploadAsStream(eq(""), any(InputStream.class))).thenReturn(new PersistedFile());
 
-        File tempFile = fileService.createTemporaryFile("upload");
+        var tempFile = fileService.createTemporaryFile("upload");
         try (FileInputStream inputStream = new FileInputStream(tempFile)) {
             fileService.transferToEphemeralStore(inputStream);
             verify(ephemeralFileStore).uploadAsStream("", inputStream);
@@ -115,8 +113,22 @@ class FileServiceTest {
     }
 
     @Test
+    void transferToEphemeralStore_WillDelegate() throws IOException {
+        when(ephemeralFileStore.uploadAsStream(eq("file-name"), eq(1234L), any(InputStream.class)))
+            .thenReturn(new PersistedFile());
+
+        var tempFile = fileService.createTemporaryFile("upload");
+        try (FileInputStream inputStream = new FileInputStream(tempFile)) {
+            fileService.transferToEphemeralStore("file-name", 1234L, inputStream);
+            verify(ephemeralFileStore).uploadAsStream("file-name", 1234L, inputStream);
+        }
+
+        verifyNoInteractions(permanentFileStore);
+    }
+
+    @Test
     void fileSizeInBytes_WillReturnSizePersistedInFileMapping() {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, AWS_S3, "native-file-id");
         var persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, AWS_S3, "native-file-id",
             "", "", 87654321L, false);
@@ -127,7 +139,7 @@ class FileServiceTest {
 
     @Test
     void stream_WillDelegateToPermanentFileStore_WhenFileMapsToPermanentStore() throws IOException {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id");
         var persistableFileMapping = new PersistableFileMapping(fileId, PERMANENT, MONGO_GRID_FS, "native-file-id",
             "", "", 123L, false);
@@ -143,7 +155,7 @@ class FileServiceTest {
 
     @Test
     void stream_WillDelegateToEphemeralFileStore_WhenFileMapsToEphemeralStore() throws IOException {
-        UUID fileId = randomUUID();
+        var fileId = randomUUID();
         var persistedFileIdentifier = new PersistedFileIdentifier(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id");
         var persistableFileMapping = new PersistableFileMapping(fileId, EPHEMERAL, MONGO_GRID_FS, "native-file-id",
             "", "", 123L, false);
