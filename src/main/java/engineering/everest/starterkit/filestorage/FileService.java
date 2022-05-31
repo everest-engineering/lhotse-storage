@@ -58,20 +58,6 @@ public class FileService {
     }
 
     /**
-     * Streaming upload of a named file to the permanent file store. File length is provided by the caller.
-     *
-     * @param  originalFilename to record for the file
-     * @param  inputStream      to read from. Must be closed by the caller.
-     * @param  fileSize         size of the file
-     * @return                  UUID assigned to this file.
-     * @throws IOException      if the file could not be persisted
-     */
-    public UUID transferToPermanentStore(String originalFilename, long fileSize, InputStream inputStream) throws IOException {
-        return permanentDeduplicatingFileStore.uploadAsStream(originalFilename, fileSize, inputStream).getPersistedFileIdentifier()
-            .getFileId();
-    }
-
-    /**
      * Streaming upload of a named file to the ephemeral file store. File length is derived from reading the input stream.
      *
      * @param  filename    to record for the file

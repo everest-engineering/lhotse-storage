@@ -105,35 +105,6 @@ class PermanentDeduplicatingFileStoreTest {
     }
 
     @Test
-    void uploadAsStreamWithKnownFileSize_WillDeduplicate_WhenFileAlreadyPresentInStore() throws IOException {
-        when(backingStore.backingStorageType()).thenReturn(MONGO_GRID_FS);
-        when(backingStore.uploadStream(any(InputStream.class), eq(ORIGINAL_FILENAME), eq(FILE_SIZE))).thenAnswer(invocation -> {
-            InputStream inputFile = invocation.getArgument(0);
-            inputFile.readAllBytes();
-            inputFile.close();
-            return fileIdentifier;
-        });
-
-        when(fileMappingRepository.findAll(any(Example.class))).thenReturn(
-            List.of(
-                new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512,
-                    FILE_SIZE, false),
-                new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512,
-                    FILE_SIZE, false),
-                new PersistableFileMapping(randomUUID(), PERMANENT, MONGO_GRID_FS, EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512,
-                    FILE_SIZE, false)));
-
-        var persistedFile = permanentDeduplicatingFileStore.uploadAsStream(ORIGINAL_FILENAME, FILE_SIZE, createTempFileWithContents());
-
-        verify(backingStore).delete(fileIdentifier);
-        verify(fileMappingRepository).save(new PersistableFileMapping(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS,
-            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false));
-        PersistedFile expectedPersistedFile = new PersistedFile(persistedFile.getFileId(), PERMANENT, MONGO_GRID_FS,
-            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE);
-        assertEquals(expectedPersistedFile, persistedFile);
-    }
-
-    @Test
     void downloadAsStream_WillReturnInputStreamOfKnownLengthFromFileStore() throws IOException {
         var inputStream = new ByteArrayInputStream(TEMPORARY_FILE_CONTENTS.getBytes());
         when(backingStore.downloadAsStream(EXISTING_BACKING_STORE_FILE_ID))
