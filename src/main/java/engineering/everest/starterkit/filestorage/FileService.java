@@ -179,8 +179,8 @@ public class FileService {
      * @throws IllegalArgumentException if the file is not ephemeral
      */
     public void markEphemeralFileForDeletion(UUID fileId) {
-        var persistableFileMapping = fileMappingRepository.findById(fileId).orElseThrow();
-        ephemeralDeduplicatingFileStore.markFileForDeletion(persistableFileMapping.getPersistedFileIdentifier());
+        fileMappingRepository.findById(fileId).ifPresent(persistableFileMapping -> ephemeralDeduplicatingFileStore
+            .markFileForDeletion(persistableFileMapping.getPersistedFileIdentifier()));
     }
 
     /**
