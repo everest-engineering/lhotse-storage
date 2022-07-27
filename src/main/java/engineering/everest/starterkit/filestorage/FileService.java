@@ -139,7 +139,7 @@ public class FileService {
      * @throws IOException    if the file cannot be read
      */
     public InputStreamOfKnownLength stream(UUID fileId, long startingOffset) throws IOException {
-        return stream(fileId, startingOffset, fileSizeInBytes(fileId));
+        return stream(fileId, startingOffset, fileSizeInBytes(fileId) - 1);
     }
 
     /**

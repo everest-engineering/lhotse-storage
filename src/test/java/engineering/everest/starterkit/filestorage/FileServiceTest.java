@@ -147,7 +147,7 @@ class FileServiceTest {
         var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(permanentFileStore.downloadAsStream(persistableFileMapping, 0L, 123L))
+        when(permanentFileStore.downloadAsStream(persistableFileMapping, 0L, 122L))
             .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
@@ -163,7 +163,7 @@ class FileServiceTest {
         var inputStreamOngoingStubbing = new ByteArrayInputStream("hello".getBytes());
 
         when(fileMappingRepository.findById(persistedFileIdentifier.getFileId())).thenReturn(Optional.of(persistableFileMapping));
-        when(ephemeralFileStore.downloadAsStream(persistableFileMapping, 0L, 123L))
+        when(ephemeralFileStore.downloadAsStream(persistableFileMapping, 0L, 122L))
             .thenReturn(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L));
 
         assertEquals(new InputStreamOfKnownLength(inputStreamOngoingStubbing, 10L),
