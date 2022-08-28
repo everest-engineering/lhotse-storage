@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 class FileServiceTest {
 
     private static final String ORIGINAL_FILENAME = "original-filename";
-
     private static final int BATCH_SIZE = 50;
 
     private FileService fileService;
@@ -217,6 +216,6 @@ class FileServiceTest {
     void deleteFileBatch_WillDelegateToEphemeralFileStore() {
         fileService.deleteEphemeralFileBatch(BATCH_SIZE);
 
-        verify(ephemeralFileStore).deleteFileBatch(BATCH_SIZE);
+        verify(ephemeralFileStore).deleteBatchOfFilesMarkedForDeletion(BATCH_SIZE);
     }
 }
