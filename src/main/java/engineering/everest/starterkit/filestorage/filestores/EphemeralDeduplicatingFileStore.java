@@ -8,8 +8,12 @@ import engineering.everest.starterkit.filestorage.persistence.PersistableFileMap
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static engineering.everest.starterkit.filestorage.filestores.FileStoreType.EPHEMERAL;
@@ -57,14 +61,35 @@ public class EphemeralDeduplicatingFileStore extends PermanentDeduplicatingFileS
         fileMappingRepository.saveAll(persistableFileMappings);
     }
 
-    public void deleteFileBatch(int batchSize) {
-        var pageable = PageRequest.of(0, batchSize);
-        var filesInBatch = fileMappingRepository.findByMarkedForDeletionTrue(pageable).stream()
-            .map(PersistableFileMapping::getBackingStorageFileId)
-            .collect(toSet());
+    public void deleteBatchOfFilesMarkedForDeletion(int batchSize) {
+        var filesMarkedForDeletion = fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, batchSize));
+        var backingStorageFilesToDeletionBatchMapping = createBackingStorageFileToDeletionBatchMapping(filesMarkedForDeletion);
 
-        backingStore.deleteFiles(filesInBatch);
-        fileMappingRepository.deleteAllByBackingStorageFileIdIn(filesInBatch);
+        backingStorageFilesToDeletionBatchMapping.forEach((backingStorageFileId, persistableFiles) -> {
+            var filesMappingToThisBackingStorageFile = fileMappingRepository.findByBackingStorageFileId(backingStorageFileId).stream()
+                .map(PersistableFileMapping::getFileId)
+                .collect(toSet());
+            filesMappingToThisBackingStorageFile.removeAll(persistableFiles);
+
+            if (filesMappingToThisBackingStorageFile.isEmpty()) {
+                backingStore.deleteFiles(Set.of(backingStorageFileId));
+            }
+        });
+
+        fileMappingRepository.deleteAll(filesMarkedForDeletion);
+    }
+
+    private static HashMap<String,
+        Set<UUID>> createBackingStorageFileToDeletionBatchMapping(List<PersistableFileMapping> filesMarkedForDeletion) {
+        var backingStorageFilesToDeletionBatchMapping = new HashMap<String, Set<UUID>>();
+
+        filesMarkedForDeletion.forEach(persistableFileMapping -> {
+            var filesForBackingFile = backingStorageFilesToDeletionBatchMapping.computeIfAbsent(
+                persistableFileMapping.getBackingStorageFileId(), key -> new HashSet<>());
+            filesForBackingFile.add(persistableFileMapping.getPersistedFileIdentifier().getFileId());
+        });
+
+        return backingStorageFilesToDeletionBatchMapping;
     }
 
     private void markPersistedFileForDeletion(PersistableFileMapping persistableFileMapping) {

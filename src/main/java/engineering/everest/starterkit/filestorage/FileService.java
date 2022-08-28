@@ -196,6 +196,6 @@ public class FileService {
      * @param batchSize is the number of files to delete
      */
     public void deleteEphemeralFileBatch(int batchSize) {
-        ephemeralDeduplicatingFileStore.deleteFileBatch(batchSize);
+        ephemeralDeduplicatingFileStore.deleteBatchOfFilesMarkedForDeletion(batchSize);
     }
 }

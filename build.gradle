@@ -61,6 +61,8 @@ java {
     }
 }
 
+build.dependsOn(spotlessApply)
+
 spotless {
     format 'misc', {
         target '*.gradle', '*.md', '.gitignore'

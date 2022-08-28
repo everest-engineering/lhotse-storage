@@ -28,6 +28,8 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -42,7 +44,8 @@ class EphemeralDeduplicatingFileStoreTest {
         "cb61c18674f50eedd4f7d77f938b11d468713516b14862c4ae4ea68ec5aa30c1475d7d38f17e14585da10ea848a054733f2185b1ea57f10a1c416bb1617baa60";
     private static final String TEMPORARY_FILE_CONTENTS = "A temporary file for unit testing";
     private static final Long FILE_SIZE = (long) TEMPORARY_FILE_CONTENTS.length();
-    private static final UUID FILE_ID = randomUUID();
+    private static final UUID FILE_ID_1 = randomUUID();
+    private static final UUID FILE_ID_2 = randomUUID();
     private static final int BATCH_SIZE = 50;
 
     private EphemeralDeduplicatingFileStore ephemeralDeduplicatingFileStore;
@@ -112,7 +115,7 @@ class EphemeralDeduplicatingFileStoreTest {
 
     @Test
     void markAllFilesForDeletion_WillMarkAllFilesInFileMappingRepositoryForDeletion() {
-        var persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS,
+        var persistableFileMapping = new PersistableFileMapping(FILE_ID_1, EPHEMERAL, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
         when(fileMappingRepository.findByFileStoreType(EPHEMERAL)).thenReturn(List.of(persistableFileMapping));
 
@@ -123,15 +126,54 @@ class EphemeralDeduplicatingFileStoreTest {
     }
 
     @Test
-    void deleteFileBatch_WillDeleteFilesFromFileStoreAndFromFileMappingRepository() {
-        var persistableFileMapping = new PersistableFileMapping(FILE_ID, EPHEMERAL, MONGO_GRID_FS,
+    void deleteBatchOfFilesMarkedForDeletion_WillDeleteFilesFromFileStoreAndFromFileMappingRepository() {
+        var persistableFileMapping = new PersistableFileMapping(FILE_ID_1, EPHEMERAL, MONGO_GRID_FS,
             EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
-        when(fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, BATCH_SIZE))).thenReturn(List.of(persistableFileMapping));
+        when(fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, BATCH_SIZE)))
+            .thenReturn(List.of(persistableFileMapping));
+        when(fileMappingRepository.findByBackingStorageFileId(EXISTING_BACKING_STORE_FILE_ID))
+            .thenReturn(List.of(persistableFileMapping));
 
-        ephemeralDeduplicatingFileStore.deleteFileBatch(BATCH_SIZE);
+        ephemeralDeduplicatingFileStore.deleteBatchOfFilesMarkedForDeletion(BATCH_SIZE);
 
+        verify(fileMappingRepository).deleteAll(List.of(persistableFileMapping));
         verify(backingStore).deleteFiles(Set.of(EXISTING_BACKING_STORE_FILE_ID));
-        verify(fileMappingRepository).deleteAllByBackingStorageFileIdIn(Set.of(EXISTING_BACKING_STORE_FILE_ID));
+    }
+
+    @Test
+    void deleteBatchOfFilesMarkedForDeletion_WillOnlyUnlinkFileInFileMappingRepository_WhenBackingFileIsStillReferenced() {
+        var persistableFileMappingToDelete = new PersistableFileMapping(FILE_ID_1, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
+        var persistableFileMappingToRetain = new PersistableFileMapping(FILE_ID_2, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, false);
+
+        when(fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, BATCH_SIZE)))
+            .thenReturn(List.of(persistableFileMappingToDelete));
+        when(fileMappingRepository.findByBackingStorageFileId(EXISTING_BACKING_STORE_FILE_ID))
+            .thenReturn(List.of(persistableFileMappingToDelete, persistableFileMappingToRetain));
+
+        ephemeralDeduplicatingFileStore.deleteBatchOfFilesMarkedForDeletion(BATCH_SIZE);
+
+        verify(fileMappingRepository).deleteAll(List.of(persistableFileMappingToDelete));
+        verify(fileMappingRepository, never()).deleteById(FILE_ID_2);
+        verify(backingStore, never()).deleteFiles(any());
+    }
+
+    @Test
+    void deleteBatchOfFilesMarkedForDeletion_WillRecoverIfInterruptedDuringBackingStorageFileDeletion() {
+        var persistableFileMappingToDelete1 = new PersistableFileMapping(FILE_ID_1, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
+        var persistableFileMappingToDelete2 = new PersistableFileMapping(FILE_ID_2, EPHEMERAL, MONGO_GRID_FS,
+            EXISTING_BACKING_STORE_FILE_ID, SHA_256, SHA_512, FILE_SIZE, true);
+        when(fileMappingRepository.findByMarkedForDeletionTrue(PageRequest.of(0, BATCH_SIZE)))
+            .thenReturn(List.of(persistableFileMappingToDelete1, persistableFileMappingToDelete2));
+        when(fileMappingRepository.findByBackingStorageFileId(EXISTING_BACKING_STORE_FILE_ID))
+            .thenReturn(List.of(persistableFileMappingToDelete2));
+
+        ephemeralDeduplicatingFileStore.deleteBatchOfFilesMarkedForDeletion(BATCH_SIZE);
+
+        verify(fileMappingRepository).deleteAll(List.of(persistableFileMappingToDelete1, persistableFileMappingToDelete2));
+        verify(backingStore).deleteFiles(Set.of(EXISTING_BACKING_STORE_FILE_ID));
     }
 
     @Test
