@@ -3,12 +3,12 @@ package engineering.everest.starterkit.filestorage.persistence;
 import engineering.everest.starterkit.filestorage.filestores.FileStoreType;
 import engineering.everest.starterkit.filestorage.backing.BackingStorageType;
 import engineering.everest.starterkit.filestorage.PersistedFileIdentifier;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.UUID;
 
 @Data
